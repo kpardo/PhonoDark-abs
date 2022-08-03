@@ -1,0 +1,163 @@
+name:      phonon
+type:      phonon
+id:        182
+status:    done
+directory: phonon
+traverse:  restart
+tasks:
+- name:      equilibrium
+  type:      structopt
+  id:        183
+  status:    done
+  directory: equilibrium
+  traverse:  restart
+- name:      disp-001
+  type:      electronic_structure
+  id:        753
+  status:    done
+  directory: disp-001
+  traverse:  restart
+- name:      disp-002
+  type:      electronic_structure
+  id:        754
+  status:    done
+  directory: disp-002
+  traverse:  restart
+- name:      disp-003
+  type:      electronic_structure
+  id:        755
+  status:    done
+  directory: disp-003
+  traverse:  restart
+- name:      disp-004
+  type:      electronic_structure
+  id:        756
+  status:    done
+  directory: disp-004
+  traverse:  restart
+- name:      disp-005
+  type:      electronic_structure
+  id:        757
+  status:    done
+  directory: disp-005
+  traverse:  restart
+- name:      disp-006
+  type:      electronic_structure
+  id:        758
+  status:    done
+  directory: disp-006
+  traverse:  restart
+- name:      disp-007
+  type:      electronic_structure
+  id:        759
+  status:    done
+  directory: disp-007
+  traverse:  restart
+lattice_tolerance: 0.100000
+stress_tolerance: 10.000000
+pressure_target: 0.000000
+force_tolerance: 0.001000
+max_increase: unset
+max_iteration: 20
+min_iteration: 1
+supercell_matrix:
+- [   2,   0,   0 ]
+- [   0,   2,   0 ]
+- [   0,   0,   1 ]
+distance: 0.010000
+lattice:
+- [     4.7746283700000003,     0.0000000000000000,     0.0000000000000000 ] # a
+- [    -2.3873141900000001,     4.1349494699999996,     0.0000000000000000 ] # b
+- [     0.0000000000000000,     0.0000000000000000,    13.0133564899999996 ] # c
+points:
+- symbol: O  # 1
+  coordinates: [  0.3333333300000000,  0.3608655600000000,  0.9166666700000000 ]
+  mass: 15.999400
+- symbol: O  # 2
+  coordinates: [  0.6941988900000000,  0.6941988900000000,  0.7500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 3
+  coordinates: [  0.6391344400000000,  0.9724677800000000,  0.9166666700000000 ]
+  mass: 15.999400
+- symbol: O  # 4
+  coordinates: [  0.0275322200000000,  0.6666666700000000,  0.9166666700000000 ]
+  mass: 15.999400
+- symbol: O  # 5
+  coordinates: [  0.3058011100000000,  0.0000000000000000,  0.7500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 6
+  coordinates: [  0.0000000000000000,  0.3058011100000000,  0.7500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 7
+  coordinates: [  0.0000000000000000,  0.6941988900000000,  0.2500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 8
+  coordinates: [  0.3608655600000000,  0.0275322200000000,  0.0833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 9
+  coordinates: [  0.3058011100000000,  0.3058011100000000,  0.2500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 10
+  coordinates: [  0.6941988900000000,  0.0000000000000000,  0.2500000000000000 ]
+  mass: 15.999400
+- symbol: O  # 11
+  coordinates: [  0.9724677800000000,  0.3333333300000000,  0.0833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 12
+  coordinates: [  0.6666666700000000,  0.6391344400000000,  0.0833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 13
+  coordinates: [  0.6666666700000000,  0.0275322200000000,  0.5833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 14
+  coordinates: [  0.0275322200000000,  0.3608655600000000,  0.4166666700000000 ]
+  mass: 15.999400
+- symbol: O  # 15
+  coordinates: [  0.9724677800000000,  0.6391344400000000,  0.5833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 16
+  coordinates: [  0.3608655600000000,  0.3333333300000000,  0.5833333300000000 ]
+  mass: 15.999400
+- symbol: O  # 17
+  coordinates: [  0.6391344400000000,  0.6666666700000000,  0.4166666700000000 ]
+  mass: 15.999400
+- symbol: O  # 18
+  coordinates: [  0.3333333300000000,  0.9724677800000000,  0.4166666700000000 ]
+  mass: 15.999400
+- symbol: Al # 19
+  coordinates: [  0.6666666700000000,  0.3333333300000000,  0.6854228700000000 ]
+  mass: 26.981539
+- symbol: Al # 20
+  coordinates: [  0.3333333300000000,  0.6666666700000000,  0.8145771300000000 ]
+  mass: 26.981539
+- symbol: Al # 21
+  coordinates: [  0.0000000000000000,  0.0000000000000000,  0.8520895400000000 ]
+  mass: 26.981539
+- symbol: Al # 22
+  coordinates: [  0.6666666700000000,  0.3333333300000000,  0.9812437899999999 ]
+  mass: 26.981539
+- symbol: Al # 23
+  coordinates: [  0.3333333300000000,  0.6666666700000000,  0.0187562100000000 ]
+  mass: 26.981539
+- symbol: Al # 24
+  coordinates: [  0.0000000000000000,  0.0000000000000000,  0.1479104600000000 ]
+  mass: 26.981539
+- symbol: Al # 25
+  coordinates: [  0.6666666700000000,  0.3333333300000000,  0.1854228700000000 ]
+  mass: 26.981539
+- symbol: Al # 26
+  coordinates: [  0.3333333300000000,  0.6666666700000000,  0.3145771300000000 ]
+  mass: 26.981539
+- symbol: Al # 27
+  coordinates: [  0.0000000000000000,  0.0000000000000000,  0.3520895400000000 ]
+  mass: 26.981539
+- symbol: Al # 28
+  coordinates: [  0.6666666700000000,  0.3333333300000000,  0.4812437900000000 ]
+  mass: 26.981539
+- symbol: Al # 29
+  coordinates: [  0.3333333300000000,  0.6666666700000000,  0.5187562100000001 ]
+  mass: 26.981539
+- symbol: Al # 30
+  coordinates: [  0.0000000000000000,  0.0000000000000000,  0.6479104600000000 ]
+  mass: 26.981539
+electric_total_energy:      -235.9912764800
