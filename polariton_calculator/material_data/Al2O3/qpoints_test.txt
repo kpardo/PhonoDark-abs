@@ -1,0 +1,5 @@
+ EIGENVECTORS = .TRUE. 
+ DIM =            2           2           2
+ PRIMITIVE_AXES = AUTO
+ NAC = .FALSE.
+ QPOINTS = 3.28e-8 3.28e-8 9.11e-9 1.12e-8 1.12e-8 -2.24e-8
