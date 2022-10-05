@@ -40,8 +40,6 @@ class TransferMatrix:
         eigen_dict = {(v, i):vec for i,(v,vec) in enumerate(zip(eigen_vals, eigen_vecs))}
         # sort Umat by eigenvalues
         U_mat = np.array(eigen_vecs[np.argsort(eigen_vals)[::-1]], dtype=complex)
-        print(eigen_vals[np.argsort(eigen_vals)[::-1]])
-        print(U_mat)
 
         U_mat_dag = np.conj(U_mat.T)
 
