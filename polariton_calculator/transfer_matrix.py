@@ -36,9 +36,19 @@ class TransferMatrix:
         KgK_mat = np.matmul(K_mat, np.matmul(g_mat, K_dag))
 
         eigen_vals, eigen_vecs = sla.eig(KgK_mat)
-        # sort Umat by eigenvalues, descending order
-        ## FIXME: Negative eigenvalues should be in ascending order...
-        U_mat = np.array(eigen_vecs[np.argsort(eigen_vals)[::-1]], dtype=complex)
+
+        ## sort Umat by eigenvalues
+        ## descending order for pos. values, ascending for neg.
+
+        ## first sort by descending order
+        sort_index = np.argsort(eigen_vals)[::-1]
+        ## find index of first negative number in sort
+        arg_first_neg = (np.less(eigen_vals[sort_index], 0)).argmax()
+        ## flip negative part of indexes
+        sort_index[arg_first_neg:] = np.flip(sort_index[arg_first_neg:])
+        ## get sort eigen vecs according to sorted eigen vals.
+        print(eigen_vals[sort_index])
+        U_mat = np.array(eigen_vecs[sort_index], dtype=complex)
         U_mat_dag = np.conj(U_mat.T)
 
         ## below is good unit test later.
@@ -49,9 +59,7 @@ class TransferMatrix:
 
         E_mat = np.matmul(g_mat, L_mat)
 
-        sqrt_E_mat = sla.sqrtm(E_mat)
-
-        T_mat = np.matmul(K_mat_inv, np.matmul(U_mat, sqrt_E_mat))
+        T_mat = np.matmul(K_mat_inv, np.matmul(U_mat, sla.sqrtm(E_mat)))
 
         return [E_mat, T_mat]
 

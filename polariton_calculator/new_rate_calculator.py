@@ -542,7 +542,7 @@ for m in range(len(run_dict['materials'])):
 		print(f'Description is {descrip}')
 		print()
 
-		file = open('./data/'+MATERIAL+'_gayy_Reach_'+descrip+'.csv', 'w')
+		file = open('./data/'+MATERIAL+'_gayy_Reach_'+descrip+'_new.csv', 'w')
 		file.write('m (eV), gayy (GeV^(-1))\n')
 
 		# file2 = open('./data/'+MATERIAL+'_photon_gayy_Reach_'+descrip+'.csv', 'w')

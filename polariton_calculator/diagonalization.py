@@ -32,12 +32,12 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 						  			force_sets_filename=FORCE_SETS_PATH
 						  		)
 
-	[	num_atoms, 
+	[	num_atoms,
 		num_modes,
 		pos_red_to_XYZ,
 		pos_XYZ_to_red,
 		recip_red_to_XYZ,
-		recip_XYZ_to_red, 
+		recip_XYZ_to_red,
 		eq_positions,
 		atom_masses,
 		born,
@@ -95,7 +95,7 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 
 		q_vec = q_XYZ_list[q]
 
-		h_mat = physics.create_h_mat(q_vec, 
+		h_mat = physics.create_h_mat(q_vec,
 									dielectric,
 									V_PC,
 									o_xi_vecs_list[q],
@@ -103,9 +103,9 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 									ph_omega_o[q],
 									photon_energy_list[q],
 									dielectric_diag_list[q],
-									physics.create_K_sq_mat(q_XYZ_list[q], 
-																born, 
-																V_PC, 
+									physics.create_K_sq_mat(q_XYZ_list[q],
+																born,
+																V_PC,
 																atom_masses
 															)
 									)
@@ -148,5 +148,3 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 	print()
 
 	return [polariton_energy_list, polariton_T_mat_list]
-
-	
