@@ -47,7 +47,6 @@ class TransferMatrix:
         ## flip negative part of indexes
         sort_index[arg_first_neg:] = np.flip(sort_index[arg_first_neg:])
         ## get sort eigen vecs according to sorted eigen vals.
-        print(eigen_vals[sort_index])
         U_mat = np.array(eigen_vecs[sort_index], dtype=complex)
         U_mat_dag = np.conj(U_mat.T)
 
