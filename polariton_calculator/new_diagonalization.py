@@ -96,20 +96,36 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 
 		q_vec = q_XYZ_list[q]
 
-		h_mat = physics.create_h_mat(q_vec,
-									dielectric,
-									V_PC,
-									o_xi_vecs_list[q],
-									photon_eigenvecs_list[q],
-									ph_omega_o[q],
-									photon_energy_list[q],
-									dielectric_diag_list[q],
-									physics.create_K_sq_mat(q_XYZ_list[q],
+		# h_mat = physics.create_h_mat(q_vec,
+		# 							dielectric,
+		# 							V_PC,
+		# 							o_xi_vecs_list[q],
+		# 							photon_eigenvecs_list[q],
+		# 							ph_omega_o[q],
+		# 							photon_energy_list[q],
+		# 							dielectric_diag_list[q],
+		# 							physics.create_K_sq_mat(q_XYZ_list[q],
+		# 														born,
+		# 														V_PC,
+		# 														atom_masses
+		# 													)
+		# 							)
+
+		tmobj = tm.TMatPol(q_vec=q_vec,
+							dielectric=dielectric,
+							V_PC = V_PC,
+							o_xi_vec = o_xi_vecs_list[q],
+							phot_eigenvecs = photon_eigenvecs_list[q],
+							o_phon_energy = ph_omega_o[q],
+							phot_energy = photon_energy_list[q],
+							dielectric_diag = dielectric_diag_list[q],
+							K_sq_mat = physics.create_K_sq_mat(q_XYZ_list[q],
 																born,
 																V_PC,
 																atom_masses
 															)
-									)
+		)
+		h_mat = tmobj.h
 
 		#[E_mat, T_mat] = physics.get_E_mat_T_mat(h_mat, h_mat_dim)
 		##KP
