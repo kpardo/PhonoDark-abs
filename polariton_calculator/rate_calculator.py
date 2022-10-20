@@ -38,7 +38,7 @@ def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
 
 	return q_XYZ_list
 
-def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec_list, vEVec):
+def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_vec_list, vEVec):
 
 	x_hat = np.array([1, 0, 0])
 	y_hat = np.array([0, 1, 0])
@@ -515,7 +515,7 @@ for m in range(len(run_dict['materials'])):
 	# 	xi_vec_list = physics.create_xi_vecs(born, bare_ph_eigen_o, atom_masses)
 
 
-	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy, xi_vec_list,
+	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list,
 									np.array([0, 0, VE]))
 
 	mode_contrib = get_rel_mode_contribution(phi_mat)
