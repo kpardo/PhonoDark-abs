@@ -90,6 +90,7 @@ class TMatPol():
 
     def __post_init__(self):
         self.h = self.get_h_matrix()
+        self.E_mat, self.T_mat = TransferMatrix(self.h).get_T_matrix()
 
 
     def get_n_modes(self, o_phon_energy):

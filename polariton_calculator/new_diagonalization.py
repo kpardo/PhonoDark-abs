@@ -110,7 +110,7 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 		# 														atom_masses
 		# 													)
 		# 							)
-
+		##KP
 		tmobj = tm.TMatPol(q_vec=q_vec,
 							dielectric=dielectric,
 							V_PC = V_PC,
@@ -129,7 +129,8 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 
 		#[E_mat, T_mat] = physics.get_E_mat_T_mat(h_mat, h_mat_dim)
 		##KP
-		[E_mat, T_mat] = tm.TransferMatrix(h_mat).get_T_matrix()
+		# [E_mat, T_mat] = tm.TransferMatrix(h_mat).get_T_matrix()
+		[E_mat, T_mat] = [tmobj.E_mat, tmobj.T_mat]
 
 		num_pol_modes = h_mat_dim//2
 
