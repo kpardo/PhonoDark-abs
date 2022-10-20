@@ -4,6 +4,8 @@ import os
 import numpy as np
 import phonopy
 import math
+import sys
+from dataclasses import dataclass
 
 from constants import *
 import physics
@@ -68,8 +70,6 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec
 
 		dielectric_inv = np.linalg.inv(dielectric)
 
-		# n_factor = (np.dot(q_dir, np.matmul(dielectric, q_dir)))**(-1)
-
 		T11_conj = np.conj(T_mat_list[q][:num_pol_modes-2, :num_pol_modes])
 
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
@@ -88,6 +88,76 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec
 									np.matmul(dielectric_inv, xi_vec[nup])[b]
 
 	return phi_mat
+
+@dataclass
+class PhiMatrix():
+	'''
+	computes the velocity and matrix element parts of the rate
+	Inputs: ...
+	Outputs: PhiMatrix
+	'''
+	q_XYZ_list: np.ndarray
+	dielectric: np.ndarray
+	T_mat_list: np.ndarray
+	bare_ph_energy_o: np.ndarray
+	xi_vec_list: np.ndarray
+	vEVec: np.ndarray
+
+	def __post_init__(self):
+		self.phi = self.get_phi()
+
+	def get_vel_contrib(self):
+		'''
+		calculates velocity distribution function
+		Inputs: q list
+		Outputs: list of velocity distribution function evaluated at q's.
+		'''
+		x_hat = np.array([1, 0, 0])
+		y_hat = np.array([0, 1, 0])
+		z_hat = np.array([0, 0, 1])
+
+		q_dir = q_XYZ_list / np.linalg.norm(q_XYZ_list)
+
+		# get theta/phi values
+		theta = math.acos(np.dot(z_hat, q_dir.T))
+		phi = math.atan2(np.dot(q_dir, y_hat),np.dot(q_dir, x_hat))
+
+		int_vel_dist_val = physics.int_vel_dist(theta, phi, vEVec)[0]
+		return int_vel_dist_val
+
+	def get_phonon_polariton_contrib(self):
+		'''
+		gets T_{\nu\nu'}(q), which is |U + V|^2
+		Inputs: T matrix list.
+		Outputs T_{\nu\nu'}(q) (q=axis0, nu=axis1, nup=axis2)
+		'''
+		num_pol_modes = len(self.T_mat_list[0])//2
+		## might not work, might need to iterate over first index
+		## before taking conj of each
+		T11_conj = np.conj(self.T_mat_list[:,:num_pol_modes-2, :num_pol_modes])
+		T21_conj = np.conj(self.T_mat_list[:,num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
+		term1 = T11_conj + T21_conj
+		term2 = np.conj(T11_conj + T21_conj)
+		return np.einsum('ijk, ilk -> ijl', term1, term2)
+
+	def get_dielectric_contrib(self):
+		'''
+		gets dielectric tensor
+		Inputs: dielectric, xi_vec
+		Outputs:
+		'''
+		dielectric_inv = np.linalg.inv(self.dielectric)
+		term1 = np.conj(np.matmul(dielectric_inv, self.xi_vec_list))
+		term2 = np.matmul(dielectric_inv, self.xi_vec_list)
+		return np.einsum('ijl,ikm -> ilm', term1, term2)
+
+	def get_phi(self):
+		int_vel_dist_val = self.get_vel_contrib()
+		Ttensor = self.get_phonon_polariton_contrib()
+		dielec = self.get_dielectric_contrib()
+		energy = np.einsum('ij,ik -> ijk', self.bare_ph_energy_o, self.bare_ph_energy_o)
+		energyterm = (energy)**(-0.5)
+		pass
 
 # def calculate_phi_mat_mix(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy,
 # 								xi_vec_list, vEVec):
@@ -514,8 +584,10 @@ for m in range(len(run_dict['materials'])):
 	# 	xi_vec_list = physics.create_xi_vecs(born, bare_ph_eigen_o, atom_masses)
 
 
-	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy, xi_vec_list,
+	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list,
 									np.array([0, 0, VE]))
+
+	sys.exit()
 
 	mode_contrib = get_rel_mode_contribution(phi_mat)
 
