@@ -160,13 +160,9 @@ def rate1(m, pol_energy_list, width_list, b_field, phi_mat):
 
 ## KP
 def rate1_b_average(m, pol_energy_list, width_list, phi_mat, widthfunc='lorentzian'):
-
-	# rate = 0.0
-	# for lam in range(len(pol_energy_list[0]) - 2):
-	#
-	# 	rate += (1/m_cell)*(E_EM**2*RHO_DM)*m**(-2)*\
-	# 				physics.L_func(m, pol_energy_list[0][lam], width_list[lam])*\
-	# 				(1/3)*T_To_eV2**2*np.trace(phi_mat[lam])
+	'''
+	calculates rate averaged over B-field directions
+	'''
 	prefac = (1/m_cell)*(E_EM**2*RHO_DM)*m**(-2)*(1./3.)*T_To_eV2**2
 	if widthfunc == 'lorentzian':
 		width = physics.L_func(m, pol_energy_list[0], width_list)
@@ -333,19 +329,22 @@ n_pol_cut = 3
 # abs_born = False
 
 run_dict = {
-				'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
-				'bfield': [
-							T_To_eV2*np.array([b_field_mag, 0, 0]),
-							T_To_eV2*np.array([0, b_field_mag, 0]),
-							T_To_eV2*np.array([0, 0, b_field_mag]),
-							'average'
-						],
-				'descrip': [
-							'Bx',
-							'By',
-							'Bz',
-							'Baverage'
-				]
+				# 'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
+				'materials': ['GaAs'],
+				# 'bfield': [
+				# 			T_To_eV2*np.array([b_field_mag, 0, 0]),
+				# 			T_To_eV2*np.array([0, b_field_mag, 0]),
+				# 			T_To_eV2*np.array([0, 0, b_field_mag]),
+				# 			'average'
+				# 		],
+				'bfield': ['average'],
+				# 'descrip': [
+				# 			'Bx',
+				# 			'By',
+				# 			'Bz',
+				# 			'Baverage'
+				# ]
+				'descrip': ['Baverage']
 			}
 
 for m in range(len(run_dict['materials'])):
@@ -557,16 +556,15 @@ for m in range(len(run_dict['materials'])):
 
 
 		if not isinstance(B_field, str):
-			print('skipping')
-			# for m in m_list:
-			#
-			# 	file.write(str(m)+', '
-			# 		+str(np.real(gayy_reach(m, exp, pol_energy_list, width_list,
-			# 								B_field, phi_mat, n_pol_cut)))+'\n')
+			for m in m_list:
 
-				# file2.write(str(m_list[mass_i])+', '
-				# 	+str(np.real(gayy_reach(m_list[mass_i], exp, pol_energy_list, width_list,
-				# 							B_field, phi_mat_mix, n_phot_cut)))+'\n')
+				file.write(str(m)+', '
+					+str(np.real(gayy_reach(m, exp, pol_energy_list, width_list,
+											B_field, phi_mat, n_pol_cut)))+'\n')
+
+				file2.write(str(m_list[mass_i])+', '
+					+str(np.real(gayy_reach(m_list[mass_i], exp, pol_energy_list, width_list,
+											B_field, phi_mat_mix, n_phot_cut)))+'\n')
 
 
 		else:
