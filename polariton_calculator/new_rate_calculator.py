@@ -112,17 +112,14 @@ class PhiMatrix():
 		Inputs: q list
 		Outputs: list of velocity distribution function evaluated at q's.
 		'''
-		x_hat = np.array([1, 0, 0])
-		y_hat = np.array([0, 1, 0])
-		z_hat = np.array([0, 0, 1])
-
 		q_dir = q_XYZ_list / np.linalg.norm(q_XYZ_list)
 
 		# get theta/phi values
-		theta = math.acos(np.dot(z_hat, q_dir.T))
-		phi = math.atan2(np.dot(q_dir, y_hat),np.dot(q_dir, x_hat))
+		# q_dir has shape N x 3, columns are x,y,z
+		theta = np.arccos(q_dir[:,2])
+		phi = np.arctan2(q_dir[:,1], q_dir[:,0])
 
-		int_vel_dist_val = physics.int_vel_dist(theta, phi, vEVec)[0]
+		int_vel_dist_val = [physics.int_vel_dist(t,p, self.vEVec)[0] for t,p in zip(theta,phi)]
 		return int_vel_dist_val
 
 	def get_phonon_polariton_contrib(self):
@@ -588,7 +585,6 @@ for m in range(len(run_dict['materials'])):
 									np.array([0, 0, VE]))
 
 	sys.exit()
-
 	mode_contrib = get_rel_mode_contribution(phi_mat)
 
 	file = open('./data/'+MATERIAL+'_rel_mode_contribution_and_energy.csv', 'w')
