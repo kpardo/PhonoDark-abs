@@ -119,7 +119,7 @@ class PhiMatrix():
 		theta = np.arccos(q_dir[:,2])
 		phi = np.arctan2(q_dir[:,1], q_dir[:,0])
 
-		int_vel_dist_val = [physics.int_vel_dist(t,p, self.vEVec)[0] for t,p in zip(theta,phi)]
+		int_vel_dist_val = np.array([physics.int_vel_dist(t,p, self.vEVec)[0] for t,p in zip(theta,phi)])
 		return int_vel_dist_val
 
 	def get_phonon_polariton_contrib(self):
@@ -149,13 +149,21 @@ class PhiMatrix():
 		return np.einsum('ijl,ikm -> ilm', term1, term2)
 
 	def get_phi(self):
+		'''
+		gets phi matrix...but gets wrong phi matrix.
+		shape is (len(q), 3, 3) rather than (num_pol, 3, 3)
+		##FIX
+		'''
 		int_vel_dist_val = self.get_vel_contrib()
 		Ttensor = self.get_phonon_polariton_contrib()
 		dielec = self.get_dielectric_contrib()
 		energy = np.einsum('ij,ik -> ijk', self.bare_ph_energy_o, self.bare_ph_energy_o)
 		energyterm = (energy)**(-0.5)
-		pass
-
+		jacob = 4 * np.pi / len(self.q_XYZ_list)
+		# all_with_jk = Ttensor*dielec*energyterm
+		# summed = np.einsum('ijk -> i', all_with_jk)
+		return jacob*int_vel_dist_val[:, np.newaxis, np.newaxis]*\
+				Ttensor*dielec*energyterm
 # def calculate_phi_mat_mix(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy,
 # 								xi_vec_list, vEVec):
 
