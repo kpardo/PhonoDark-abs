@@ -10,7 +10,7 @@ from constants import *
 import phonopy_funcs
 import physics
 import my_math
-import transfer_matrix as tm
+import uvmatrix as uv
 
 ###########
 
@@ -111,7 +111,7 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 		# 													)
 		# 							)
 		##KP
-		tmobj = tm.TMatPol(q_vec=q_vec,
+		tmobj = uv.UVMatPol(q_vec=q_vec,
 							dielectric=dielectric,
 							V_PC = V_PC,
 							o_xi_vec = o_xi_vecs_list[q],

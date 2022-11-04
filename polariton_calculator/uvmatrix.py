@@ -1,7 +1,7 @@
 '''
-transfer_matrix.py
+uvmatrix.py
 
-Defines the transfer matrix class and subclasses.
+Defines the UVMatrix class and subclasses.
 '''
 from dataclasses import dataclass
 import numpy as np
@@ -11,11 +11,11 @@ import sys
 from constants import *
 
 @dataclass
-class TransferMatrix:
+class UVMatrix:
     '''
-    Calculates the T matrix for a generic h matrix
+    Calculates the U,V matrix for a generic h matrix
     Input: hmatrix
-    Outputs: diagonalized T matrix
+    Outputs: diagonalized U,V matrix
     '''
     hmatrix: np.ndarray
 
@@ -72,7 +72,7 @@ class TransferMatrix:
         return [E_mat, T_mat]
 
 @dataclass
-class TMatPol():
+class UVMatPol():
     '''
     Calculates the T matrix for phonon-polariton contributions.
     Inputs: ??

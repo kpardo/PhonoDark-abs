@@ -74,6 +74,10 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec
 
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
 
+		## checking with no polariton mixing
+		# T11_conj = np.eye(len(T11_conj))
+		# T21_conj = np.zeros(np.shape(T21_conj))
+
 		for lam in range(num_pol_modes-2):
 			for nu in range(num_pol_modes - 2):
 				for nup in range(num_pol_modes - 2):
@@ -404,8 +408,8 @@ n_pol_cut = 3
 # abs_born = False
 
 run_dict = {
-				# 'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
-				'materials': ['GaAs'],
+				'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
+				# 'materials': ['GaAs'],
 				# 'bfield': [
 				# 			T_To_eV2*np.array([b_field_mag, 0, 0]),
 				# 			T_To_eV2*np.array([0, b_field_mag, 0]),
@@ -592,7 +596,7 @@ for m in range(len(run_dict['materials'])):
 	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list,
 									np.array([0, 0, VE]))
 
-	sys.exit()
+
 	mode_contrib = get_rel_mode_contribution(phi_mat)
 
 	file = open('./data/'+MATERIAL+'_rel_mode_contribution_and_energy.csv', 'w')
