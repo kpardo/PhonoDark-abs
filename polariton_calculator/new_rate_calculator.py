@@ -40,7 +40,7 @@ def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
 
 	return q_XYZ_list
 
-def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec_list, vEVec):
+def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_vec_list, vEVec):
 
 	x_hat = np.array([1, 0, 0])
 	y_hat = np.array([0, 1, 0])
@@ -75,8 +75,8 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy, xi_vec
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
 
 		## checking with no polariton mixing
-		# T11_conj = np.eye(len(T11_conj))
-		# T21_conj = np.zeros(np.shape(T21_conj))
+		T11_conj = np.eye(len(T11_conj))
+		T21_conj = np.zeros(np.shape(T21_conj))
 
 		for lam in range(num_pol_modes-2):
 			for nu in range(num_pol_modes - 2):
@@ -168,63 +168,8 @@ class PhiMatrix():
 		# summed = np.einsum('ijk -> i', all_with_jk)
 		return jacob*int_vel_dist_val[:, np.newaxis, np.newaxis]*\
 				Ttensor*dielec*energyterm
-# def calculate_phi_mat_mix(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy,
-# 								xi_vec_list, vEVec):
 
-# 	x_hat = np.array([1, 0, 0])
-# 	y_hat = np.array([0, 1, 0])
-# 	z_hat = np.array([0, 0, 1])
-
-# 	num_q = len(q_XYZ_list)
-
-# 	num_pol_modes = len(T_mat_list[0])//2
-
-# 	phi_mat = np.zeros((num_pol_modes, 3, 3), dtype=complex)
-
-# 	jacob = 4*PI/num_q
-
-# 	for q in range(num_q):
-
-# 		q_vec = q_XYZ_list[q]
-
-# 		q_dir = q_vec / np.linalg.norm(q_vec)
-
-# 		# get theta/phi values
-# 		theta = math.acos(np.dot(z_hat, q_dir))
-# 		phi = math.atan2(np.dot(q_dir, y_hat),np.dot(q_dir, x_hat))
-
-# 		int_vel_dist_val = physics.int_vel_dist(theta, phi, vEVec)[0]
-
-# 		xi_vec = xi_vec_list[q]
-
-# 		n_factor = (np.dot(q_dir, np.matmul(dielectric, q_dir)))**(-1)
-
-# 		T11_conj = np.conj(T_mat_list[q][:num_pol_modes-2, :num_pol_modes])
-
-# 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
-
-# 		mixing_matrix = np.linalg.inv(T_mat_list[q])[:num_pol_modes, num_pol_modes - 2:num_pol_modes]
-
-# 		for lam in range(num_pol_modes-2):
-
-# 			mixing_param_sq = mixing_matrix[lam][0]*np.conj(mixing_matrix[lam][0]) + \
-# 								mixing_matrix[lam][1]*np.conj(mixing_matrix[lam][1])
-
-# 			for nu in range(num_pol_modes - 2):
-# 				for nup in range(num_pol_modes - 2):
-# 					for a in range(3):
-# 						for b in range(3):
-
-# 							phi_mat[lam][a][b] += mixing_param_sq*jacob*int_vel_dist_val*(n_factor)**2*\
-# 									(T11_conj[nu][lam] + T21_conj[nu][lam])*\
-# 									np.conj((T11_conj[nup][lam] + T21_conj[nup][lam]))*\
-# 									np.sqrt(bare_ph_energy_o[q][nu]*bare_ph_energy_o[q][nup])**(-1)*\
-# 									np.conj(xi_vec[nu][a])*xi_vec[nup][b]
-
-# 	return phi_mat
-
-
-def rate1(m, pol_energy_list, width_list, b_field, phi_mat):
+def rate1(m, pol_energy_list, width_list, b_field, phi_mat, m_cell):
 
 	rate = 0.0
 
@@ -237,8 +182,7 @@ def rate1(m, pol_energy_list, width_list, b_field, phi_mat):
 	return rate
 
 
-## KP
-def rate1_b_average(m, pol_energy_list, width_list, phi_mat, widthfunc='lorentzian'):
+def rate1_b_average(m, pol_energy_list, width_list, phi_mat, m_cell, widthfunc='lorentzian'):
 	'''
 	calculates rate averaged over B-field directions
 	'''
@@ -247,24 +191,27 @@ def rate1_b_average(m, pol_energy_list, width_list, phi_mat, widthfunc='lorentzi
 		width = physics.L_func(m, pol_energy_list[0], width_list)
 	elif widthfunc == 'gaussian':
 		width = physics.gaussian(m, pol_energy_list[0], width_list)
+
 	return np.sum(prefac * width * np.trace(phi_mat, axis1=1, axis2=2))
 
 
-def gayy_reach(m, exposure, pol_energy_list, width_list, b_field, phi_mat, n_cut):
+def gayy_reach(m, exposure, pol_energy_list, width_list, b_field,
+				phi_mat, n_cut, m_cell):
 	"""
 	returns the reach in gayy in GeV
 	"""
 
-	return np.sqrt(n_cut/(rate1(m, pol_energy_list, width_list, b_field, phi_mat)*
+	return np.sqrt(n_cut/(rate1(m, pol_energy_list, width_list, b_field, phi_mat, m_cell)*
 						exposure*KG_YR))*inveV_To_invGeV
 
 
-def gayy_reach_b_average(m, exposure, pol_energy_list, width_list, phi_mat, n_cut):
+def gayy_reach_b_average(m, exposure, pol_energy_list, width_list,
+							phi_mat, n_cut, m_cell):
 	"""
 	returns the reach in gayy in GeV
 	"""
 
-	return np.sqrt(n_cut/(rate1_b_average(m, pol_energy_list, width_list, phi_mat)*
+	return np.sqrt(n_cut/(rate1_b_average(m, pol_energy_list, width_list, phi_mat, m_cell)*
 						exposure*KG_YR))*inveV_To_invGeV
 
 
@@ -292,105 +239,7 @@ def get_mode_contribution(phi_mat):
 
 	return phi_mat_trace
 
-def check_U_plus_V(T_mat):
 
-	num_pol = len(T_mat)//2
-
-	print(num_pol)
-	T11_conj = np.conj(T_mat[:num_pol, :num_pol])
-
-	T21_conj = np.conj(T_mat[num_pol:, :num_pol])
-
-	UpV = T11_conj + T21_conj
-
-	print('U_(nup, nu)^*_p + V_(nup, nu)_(-p) : ')
-	print()
-
-	for i in range(num_pol):
-		for j in range(num_pol):
-
-			if UpV[i][j]*np.conj(UpV[i][j]) < 10**(-6):
-				UpV[i][j] = 0
-
-	my_math.matprint(UpV*np.conj(UpV))
-	print()
-
-
-def compare_mats(m1, m2, tol):
-	"""
-	compares two matrices, if the maximum difference between them is less than tol
-	returns True, otherwise False
-	"""
-
-	diff_mat = m1 - m2
-
-	diff_mat_sq = (m1 - m2)*np.conj(m1 - m2)
-
-	max_diff_sq = np.amax(diff_mat_sq)
-
-	if max_diff_sq < tol:
-		return [True, max_diff_sq]
-	else:
-		return [False, max_diff_sq]
-
-
-def check_T_mat_properties(q_XYZ_list, MATERIAL):
-
-	print('!! CHECKING PROPERTIES OF T matrix AT EACH Q')
-	print('!! COMMENT OUT FOR FASTER SPEED')
-
-	[pol_energy_list, pol_T_list] = diagonalization.calculate_pol_E_T(MATERIAL, q_XYZ_list)
-
-	[pol_energy_list_mq, pol_T_list_mq] = diagonalization.calculate_pol_E_T(MATERIAL, -1*q_XYZ_list)
-
-	num_pol = len(pol_energy_list_mq[0])
-
-	for q in range(len(q_XYZ_list)):
-
-		T11q = pol_T_list[q][:num_pol, :num_pol]
-		T12q = pol_T_list[q][:num_pol, num_pol:]
-		T21q = pol_T_list[q][num_pol:, :num_pol]
-		T22q = pol_T_list[q][num_pol:, num_pol:]
-
-		T11mq = pol_T_list_mq[q][:num_pol, :num_pol]
-		T12mq = pol_T_list_mq[q][:num_pol, num_pol:]
-		T21mq = pol_T_list_mq[q][num_pol:, :num_pol]
-		T22mq = pol_T_list_mq[q][num_pol:, num_pol:]
-
-		tol_param = 10**(-3)
-
-		if not compare_mats(T11q, np.conj(T22mq), tol_param)[0]:
-			print("T11_q != T22_(-q)^*")
-			print(q)
-			print('Max difference :')
-			print(compare_mats(T11q, np.conj(T22mq), tol_param)[1])
-
-			# for nu in range(num_pol):
-			# 	print(nu)
-			# 	print(compare_mats(T11q[nu], np.conj(T22mq)[nu], tol_param)[1])
-
-			# print(T11q[28])
-			# print(np.conj(T22mq)[28])
-			# print((T11q[28] - np.conj(T22mq)[28])*np.conj(T11q[28] - np.conj(T22mq)[28]))
-			# print()
-			# exit()
-		if not compare_mats(T12q, np.conj(T21mq), tol_param):
-			print("T12q != T21_(-q)^*")
-			print(q)
-			print(compare_mats(T12q, np.conj(T21mq), tol_param)[1])
-			print()
-
-		if not compare_mats(T21q, np.conj(T12mq), tol_param):
-			print("T21q != T12_(-q)^*")
-			print(q)
-			print(compare_mats(T21q, np.conj(T12mq), tol_param)[1])
-			print()
-
-		if not compare_mats(T22q, np.conj(T11mq), tol_param):
-			print("T22_q != T11_(-q)^*")
-			print(q)
-			print(compare_mats(T22q, np.conj(T11mq), tol_param)[1])
-			print()
 
 ##################################
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -400,12 +249,6 @@ b_field_mag = 10 # T
 exp = 1			 # kg-yr
 
 n_pol_cut = 3
-
-# born_diag = False
-# born_sym = False
-
-# # change BORN to identity matrix (check that rate -> 0 when all atoms couple in the same way)
-# abs_born = False
 
 run_dict = {
 				'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
@@ -426,8 +269,7 @@ run_dict = {
 				'descrip': ['Baverage']
 			}
 
-for m in range(len(run_dict['materials'])):
-
+def get_results(m):
 	MATERIAL = run_dict['materials'][m]
 
 	print('Material number '+str(m + 1)+' / '+str(len(run_dict['materials']))+' : '+MATERIAL)
@@ -435,93 +277,11 @@ for m in range(len(run_dict['materials'])):
 
 	q_XYZ_list = generate_q_mesh(10**(-4), 5, 5)
 
-	# print(q_XYZ_list[12])
-
-	# check that T matrices satisfy the q -> -q properties
-	# q_XYZ_list = np.array([[10**(-4), 0, 0]])
-
-	check_T_mat_properties(q_XYZ_list, MATERIAL)
-
 	[pol_energy_list, pol_T_list] = diagonalization.calculate_pol_E_T(MATERIAL, q_XYZ_list)
-
-	# check_U_plus_V(pol_T_list[0])
-
-	# exit()
 
 	num_pol = len(pol_T_list[0])//2
 
-	# check_U_plus_V(pol_T_list[0])
-
 	dir_path = os.path.dirname(os.path.realpath(__file__))
-
-	# exit()
-
-	# zero_pt = np.zeros(2, dtype=complex)
-
-	# for lam in range(2):
-	# 	for nu in range(num_pol):
-	# 		zero_pt[lam] += T21[num_pol-2+lam][nu]*np.conj(T21[num_pol-2+lam][nu])
-
-	# print(zero_pt[lam])
-	# print()
-
-	# my_math.matprint(T11[num_pol-2:, :]*np.conj(T11[num_pol-2:, :]) +
-	# 				T21[num_pol-2:, :]*np.conj(T21[num_pol-2:, :]))
-
-	# exit()
-
-	# Umat = pol_T_list[0][num_pol - 2:num_pol, :num_pol]
-
-	# print('T_22_q')
-	# my_math.matprint(pol_T_list[0][num_pol:, num_pol:])
-	# print()
-	# print('T_11_(-q)^*')
-	# my_math.matprint(np.conj(pol_T_list[1][:num_pol, :num_pol]))
-
-	# exit()
-
-
-
-
-	# my_math.matprint(pol_T_list[0][2*num_pol - 2:2*num_pol, num_pol:2*num_pol])
-
-	# Vmat = pol_T_list[0][num_pol - 2:num_pol, num_pol:]
-
-	# exit()
-
-	# mixing_matrix_sq = np.zeros((num_pol, 2), dtype=complex)
-
-	# for nu in range(num_pol):
-	# 	for lam in range(2):
-
-	# 		mixing_matrix_sq[nu][lam] = ( Umat[lam][nu]*np.conj(Umat[lam][nu]) +\
-	# 										Vmat[lam][nu]*np.conj(Vmat[lam][nu])
-	# 									)
-
-	# file = open('./data/'+MATERIAL+'_mixing_matrix.csv', 'w')
-
-	# file.write('sum_lam <0| N_lam |0>\n')
-
-
-
-	# file.write(str(np.real(zero_pt))+'\n')
-	# file.write('\n')
-
-	# file.write('theta^2_(nu, lam) == |U_(3n+lam, nu)|^2 + |V_(3n+lam, nu)|^2,'+
-	# 			' theta_nu0^2 + theta_nu1^2, U_(3n+lam, nu),V_(3n+lam, nu), E_nup\n')
-	# for nup in range(num_pol):
-	# 	file.write(
-	# 				str(np.real(mixing_matrix_sq[nup][0]))+' , '
-	# 				+str(np.real(mixing_matrix_sq[nup][1]))+' , '+
-	# 				str(
-	# 					np.real(mixing_matrix_sq[nup][0] + mixing_matrix_sq[nup][1])
-	# 					)+' , '+
-	# 				str(Umat[:, nup])+' , '+
-	# 				str(Vmat[:, nup])+' , '+
-	# 				str(pol_energy_list[0][nup])+'\n')
-	# file.close()
-
-	# exit()
 
 	POSCAR_PATH     = dir_path+"/material_data/"+MATERIAL+"/POSCAR"
 	FORCE_SETS_PATH = dir_path+"/material_data/"+MATERIAL+"/FORCE_SETS"
@@ -545,27 +305,6 @@ for m in range(len(run_dict['materials'])):
 		dielectric,
 		V_PC		] = phonopy_funcs.get_phonon_file_data(phonon_file, MATERIAL)
 
-	# if born_diag:
-
-	# 	for i in range(len(born)):
-	# 		born_xx = born[i, 0, 0]
-	# 		born_yy = born[i, 1, 1]
-	# 		born_zz = born[i, 2, 2]
-
-	# 		born[i] = [[born_xx, 0, 0], [0, born_yy, 0], [0, 0, born_zz]]
-
-	# if born_sym:
-
-	# 	for i in range(len(born)):
-
-	# 		old_born = born[i]
-
-	# 		born[i] = (0.5)*(old_born + old_born.T)
-
-	if not np.allclose(sum(born), np.zeros((3,3))):
-		print('Acoustic sum rule violated.')
-		print(sum(born))
-
 	m_cell = np.sum(atom_masses)
 
 	# width_list = 10**(-2)*pol_energy_list[0]
@@ -584,33 +323,22 @@ for m in range(len(run_dict['materials'])):
 	print('Computing phi matrix for '+MATERIAL+'...')
 	print()
 
-	# if abs_born:
-	# 	print('EDITING BORN')
-	# 	for j in range(len(born)):
-
-	# 		born[j] = np.diag(np.ones(3))
-
-	# 	xi_vec_list = physics.create_xi_vecs(born, bare_ph_eigen_o, atom_masses)
-
-
 	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list,
 									np.array([0, 0, VE]))
 
+	##### transfer matrix will go here. #####
 
-	mode_contrib = get_rel_mode_contribution(phi_mat)
-
-	file = open('./data/'+MATERIAL+'_rel_mode_contribution_and_energy.csv', 'w')
-	file.write('relative contribution to rate (dimensionless), Energy (eV) \n')
-
-	for lam in range(len(pol_energy_list[0]) - 2):
-		file.write(str(mode_contrib[lam])+' , '+str(pol_energy_list[0][lam])+'\n')
-
-	file.close()
-
-	# phi_mat_mix = calculate_phi_mat_mix(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy, xi_vec_list,
-	# 								np.array([0, 0, VE]))
-
-	print('Done!\n')
+	# mode_contrib = get_rel_mode_contribution(phi_mat)
+	#
+	# file = open('./data/'+MATERIAL+'_rel_mode_contribution_and_energy.csv', 'w')
+	# file.write('relative contribution to rate (dimensionless), Energy (eV) \n')
+	#
+	# for lam in range(len(pol_energy_list[0]) - 2):
+	# 	file.write(str(mode_contrib[lam])+' , '+str(pol_energy_list[0][lam])+'\n')
+	#
+	# file.close()
+	#
+	# print('Done!\n')
 
 	for f in range(len(run_dict['bfield'])):
 
@@ -624,10 +352,6 @@ for m in range(len(run_dict['materials'])):
 		file = open('./data/'+MATERIAL+'_gayy_Reach_'+descrip+'_new.csv', 'w')
 		file.write('m (eV), gayy (GeV^(-1))\n')
 
-		# file2 = open('./data/'+MATERIAL+'_photon_gayy_Reach_'+descrip+'.csv', 'w')
-		# file2.write('m (eV), gayy (GeV^(-1))\n')
-
-		## KP
 		num_m = int(1.e6)
 		m_list = np.logspace(-2, 0, num_m)
 		indices = np.searchsorted(m_list, pol_energy_list[0,:-2])
@@ -640,12 +364,8 @@ for m in range(len(run_dict['materials'])):
 
 				file.write(str(m)+', '
 					+str(np.real(gayy_reach(m, exp, pol_energy_list, width_list,
-											B_field, phi_mat, n_pol_cut)))+'\n')
-
-				file2.write(str(m_list[mass_i])+', '
-					+str(np.real(gayy_reach(m_list[mass_i], exp, pol_energy_list, width_list,
-											B_field, phi_mat_mix, n_phot_cut)))+'\n')
-
+											B_field, phi_mat,
+											n_pol_cut, m_cell)))+'\n')
 
 		else:
 
@@ -653,13 +373,14 @@ for m in range(len(run_dict['materials'])):
 
 				file.write(str(m)+', '
 					+str(np.real(gayy_reach_b_average(m, exp*b_field_mag**2, pol_energy_list,
-														width_list, phi_mat, n_pol_cut)))+'\n')
-
-				# file2.write(str(m_list[mass_i])+', '
-				# 	+str(np.real(gayy_reach_b_average(m_list[mass_i], exp*b_field_mag**2, pol_energy_list,
-				# 										width_list, phi_mat_mix, n_phot_cut)))+'\n')
+														width_list, phi_mat,
+														n_pol_cut, m_cell)))+'\n')
 
 		print('Done!')
 		print()
 
 		file.close()
+
+
+for m in range(len(run_dict['materials'])):
+	get_results(m)
