@@ -6,9 +6,10 @@ import phonopy
 import math
 import sys
 from dataclasses import dataclass
+import pandas as pd
 
 from constants import *
-import physics
+import new_physics as physics
 import new_diagonalization as diagonalization
 import phonopy_funcs
 import my_math
@@ -186,7 +187,7 @@ def rate1_b_average(m, pol_energy_list, width_list, phi_mat, m_cell, widthfunc='
 	elif widthfunc == 'gaussian':
 		width = physics.gaussian(m, pol_energy_list[0], width_list)
 
-	return np.sum(prefac * width * np.trace(phi_mat, axis1=1, axis2=2))
+	return np.sum(prefac[:, np.newaxis] * width * np.trace(phi_mat, axis1=1, axis2=2))
 
 
 def gayy_reach(m, exposure, pol_energy_list, width_list, b_field,
@@ -343,8 +344,7 @@ def get_results(m):
 		print(f'Description is {descrip}')
 		print()
 
-		file = open('./data/'+MATERIAL+'_gayy_Reach_'+descrip+'_new.csv', 'w')
-		file.write('m (eV), gayy (GeV^(-1))\n')
+		fn = './data/'+MATERIAL+'_gayy_Reach_'+descrip+'_new.csv'
 
 		num_m = int(1.e6)
 		m_list = np.logspace(-2, 0, num_m)
@@ -352,28 +352,24 @@ def get_results(m):
 		m_list = np.insert(m_list, indices, pol_energy_list[0,:-2])
 		## to -2 in pol_energy_list to avoid acoustic modes.
 
-
 		if not isinstance(B_field, str):
-			for m in m_list:
+			reach = np.real(gayy_reach(m_list, exp, pol_energy_list, width_list,
+									B_field, phi_mat,
+									n_pol_cut, m_cell))
 
-				file.write(str(m)+', '
-					+str(np.real(gayy_reach(m, exp, pol_energy_list, width_list,
-											B_field, phi_mat,
-											n_pol_cut, m_cell)))+'\n')
 
 		else:
+			reach = np.real(gayy_reach_b_average(m_list, exp*b_field_mag**2, pol_energy_list,
+												width_list, phi_mat,
+												n_pol_cut, m_cell))
 
-			for m in m_list:
-
-				file.write(str(m)+', '
-					+str(np.real(gayy_reach_b_average(m, exp*b_field_mag**2, pol_energy_list,
-														width_list, phi_mat,
-														n_pol_cut, m_cell)))+'\n')
+		table = pd.DataFrame({'m (eV)':m_list,
+		 					'gayy (GeV^(-1))':reach})
+		table.to_csv(fn)
 
 		print('Done!')
 		print()
 
-		file.close()
 
 
 for m in range(len(run_dict['materials'])):
