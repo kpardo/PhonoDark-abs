@@ -90,7 +90,7 @@ class UVMatPol():
 
     def __post_init__(self):
         self.h = self.get_h_matrix()
-        self.E_mat, self.T_mat = TransferMatrix(self.h).get_T_matrix()
+        self.E_mat, self.T_mat = UVMatrix(self.h).get_T_matrix()
 
 
     def get_n_modes(self, o_phon_energy):
@@ -208,13 +208,13 @@ class UVMatPol():
 
         return h_mat
 
-@dataclass
-class TMatPhonon(TransferMatrix):
-    '''
-    Inputs: energies, operator, approxs
-    '''
-    pass
-
-@dataclass
-class TMatMagnon(TransferMatrix):
-    pass
+# @dataclass
+# class TMatPhonon(TransferMatrix):
+#     '''
+#     Inputs: energies, operator, approxs
+#     '''
+#     pass
+#
+# @dataclass
+# class TMatMagnon(TransferMatrix):
+#     pass
