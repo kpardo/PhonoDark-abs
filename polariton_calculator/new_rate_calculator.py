@@ -14,31 +14,25 @@ import phonopy_funcs
 import my_math
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
+	'''
+	creates x,y,z mesh of q values with given magnitude
+	distributed across sphere
+	'''
+	start = (0.5)/num_q_phi ## start and end away from pole
 
-	q_XYZ_list = []
+	## sample thetas using arccos function to create more even grid?
+	betas = np.linspace(start, (1-start), num_q_theta)
+	thetas = np.arccos(2*betas - 1.)
 
+	phis = np.linspace(start*2*np.pi, 2*np.pi*(1-start), num_q_phi)
+	pp, tt = np.meshgrid(phis, thetas, indexing='xy')
 
-	num_q = num_q_phi*num_q_theta
-	for i in range(num_q_phi):
-		for j in range(num_q_theta):
+	xx = np.array([np.sin(tt)*np.cos(pp)], dtype=np.float64)
+	yy = np.array([np.sin(tt)*np.sin(pp)], dtype=np.float64)
+	zz = np.array([np.cos(tt)], dtype=np.float64)
+	qxyz = q_mag*np.vstack([xx,yy,zz]).T
 
-			chi = (i + 0.5)/num_q_phi
-			beta = (j + 0.5)/num_q_theta
-
-			phi = 2*PI*chi
-			theta = np.arccos(2*beta - 1)
-
-			q_XYZ_list.append(
-								q_mag*np.array([
-								np.sin(theta)*np.cos(phi),
-								np.sin(theta)*np.sin(phi),
-								np.cos(theta)
-								])
-							)
-
-	q_XYZ_list = np.array(q_XYZ_list, dtype=np.float64)
-
-	return q_XYZ_list
+	return qxyz.reshape((num_q_theta*num_q_phi, 3))
 
 def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_vec_list, vEVec):
 
@@ -75,8 +69,8 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_v
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
 
 		## checking with no polariton mixing
-		T11_conj = np.eye(len(T11_conj))
-		T21_conj = np.zeros(np.shape(T21_conj))
+		# T11_conj = np.eye(len(T11_conj))
+		# T21_conj = np.zeros(np.shape(T21_conj))
 
 		for lam in range(num_pol_modes-2):
 			for nu in range(num_pol_modes - 2):
