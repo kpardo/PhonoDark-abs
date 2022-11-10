@@ -186,8 +186,8 @@ def rate1_b_average(m, pol_energy_list, width_list, phi_mat, m_cell, widthfunc='
 		width = physics.L_func(m, pol_energy_list[0], width_list)
 	elif widthfunc == 'gaussian':
 		width = physics.gaussian(m, pol_energy_list[0], width_list)
-
-	return np.sum(prefac[:, np.newaxis] * width * np.trace(phi_mat, axis1=1, axis2=2))
+		
+	return np.sum(prefac[:, np.newaxis] * width * np.trace(phi_mat, axis1=1, axis2=2), axis=1)
 
 
 def gayy_reach(m, exposure, pol_energy_list, width_list, b_field,
