@@ -70,8 +70,8 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_v
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
 
 		## checking with no polariton mixing
-		# T11_conj = np.eye(len(T11_conj))
-		# T21_conj = np.zeros(np.shape(T21_conj))
+		T11_conj = np.eye(len(T11_conj))
+		T21_conj = np.zeros(np.shape(T21_conj))
 
 		for lam in range(num_pol_modes-2):
 			for nu in range(num_pol_modes - 2):
@@ -105,20 +105,21 @@ class PhiMatrix():
 	def __post_init__(self):
 		self.phi = self.get_phi()
 
-	def get_vel_contrib(self):
+	@staticmethod
+	def get_vel_contrib(q_XYZ_list, vEVec):
 		'''
 		calculates velocity distribution function
 		Inputs: q list
 		Outputs: list of velocity distribution function evaluated at q's.
 		'''
-		q_dir = q_XYZ_list / np.linalg.norm(q_XYZ_list)
+		q_dir = q_XYZ_list / np.linalg.norm(q_XYZ_list, axis=1)[:, np.newaxis]
 
 		# get theta/phi values
 		# q_dir has shape N x 3, columns are x,y,z
 		theta = np.arccos(q_dir[:,2])
 		phi = np.arctan2(q_dir[:,1], q_dir[:,0])
 
-		int_vel_dist_val = np.array([physics.int_vel_dist(t,p, self.vEVec)[0] for t,p in zip(theta,phi)])
+		int_vel_dist_val = np.array([physics.int_vel_dist(t,p, vEVec)[0] for t,p in zip(theta,phi)])
 		return int_vel_dist_val
 
 	def get_phonon_polariton_contrib(self):
@@ -128,13 +129,12 @@ class PhiMatrix():
 		Outputs T_{\nu\nu'}(q) (q=axis0, nu=axis1, nup=axis2)
 		'''
 		num_pol_modes = len(self.T_mat_list[0])//2
-		## might not work, might need to iterate over first index
-		## before taking conj of each
 		T11_conj = np.conj(self.T_mat_list[:,:num_pol_modes-2, :num_pol_modes])
 		T21_conj = np.conj(self.T_mat_list[:,num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
+		# 25 x 3 x 5 -- qs, xs, pols
 		term1 = T11_conj + T21_conj
 		term2 = np.conj(T11_conj + T21_conj)
-		return np.einsum('ijk, ilk -> ijl', term1, term2)
+		return np.einsum('ijk, ilk -> ik', term1, term2)
 
 	def get_dielectric_contrib(self):
 		'''
@@ -153,14 +153,20 @@ class PhiMatrix():
 		shape is (len(q), 3, 3) rather than (num_pol, 3, 3)
 		##FIX
 		'''
-		int_vel_dist_val = self.get_vel_contrib()
+		int_vel_dist_val = self.get_vel_contrib(self.q_XYZ_list, self.vEVec)
 		Ttensor = self.get_phonon_polariton_contrib()
 		dielec = self.get_dielectric_contrib()
 		energy = np.einsum('ij,ik -> ijk', self.bare_ph_energy_o, self.bare_ph_energy_o)
 		energyterm = (energy)**(-0.5)
 		jacob = 4 * np.pi / len(self.q_XYZ_list)
+		## np.sum(Ttensor, axis=0) agrees with OG code, except last two entries
+		## should be 0.
+		
 		# all_with_jk = Ttensor*dielec*energyterm
 		# summed = np.einsum('ijk -> i', all_with_jk)
+
+		print(np.shape(int_vel_dist_val), np.shape(energy), np.shape(dielec),
+		np.shape(Ttensor))
 		return jacob*int_vel_dist_val[:, np.newaxis, np.newaxis]*\
 				Ttensor*dielec*energyterm
 
@@ -186,7 +192,7 @@ def rate1_b_average(m, pol_energy_list, width_list, phi_mat, m_cell, widthfunc='
 		width = physics.L_func(m, pol_energy_list[0], width_list)
 	elif widthfunc == 'gaussian':
 		width = physics.gaussian(m, pol_energy_list[0], width_list)
-		
+
 	return np.sum(prefac[:, np.newaxis] * width * np.trace(phi_mat, axis1=1, axis2=2), axis=1)
 
 
@@ -246,8 +252,8 @@ exp = 1			 # kg-yr
 n_pol_cut = 3
 
 run_dict = {
-				'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
-				# 'materials': ['GaAs'],
+				# 'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
+				'materials': ['GaAs'],
 				# 'bfield': [
 				# 			T_To_eV2*np.array([b_field_mag, 0, 0]),
 				# 			T_To_eV2*np.array([0, b_field_mag, 0]),
@@ -340,11 +346,11 @@ def get_results(m):
 		B_field = run_dict['bfield'][f]
 		descrip = run_dict['descrip'][f]
 
-		print('Computing rate for B field : '+str(B_field))
+		print(f'Computing rate for B field : {B_field}')
 		print(f'Description is {descrip}')
 		print()
 
-		fn = './data/'+MATERIAL+'_gayy_Reach_'+descrip+'_new.csv'
+		fn = f'./data/{MATERIAL}_gayy_Reach_{descrip}_new.csv'
 
 		num_m = int(1.e6)
 		m_list = np.logspace(-2, 0, num_m)
@@ -363,14 +369,24 @@ def get_results(m):
 												width_list, phi_mat,
 												n_pol_cut, m_cell))
 
+			reach_res = np.real(gayy_reach_b_average(pol_energy_list[0,:-2], exp*b_field_mag**2, pol_energy_list,
+												width_list, phi_mat,
+												n_pol_cut, m_cell))
+
 		table = pd.DataFrame({'m (eV)':m_list,
 		 					'gayy (GeV^(-1))':reach})
 		table.to_csv(fn)
 
+		table_res = pd.DataFrame({'m (eV)':pol_energy_list[0,:-2],
+		 					'gayy (GeV^(-1))':reach_res})
+
+		table_res.to_csv(f'./data/{MATERIAL}_gayy_Reach_{descrip}_new_res.csv')
+
+
 		print('Done!')
 		print()
+		return dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list, np.array([0, 0, VE])
 
 
-
-for m in range(len(run_dict['materials'])):
-	get_results(m)
+# for m in range(len(run_dict['materials'])):
+# 	get_results(m)
