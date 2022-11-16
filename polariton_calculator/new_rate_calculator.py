@@ -13,6 +13,7 @@ import new_physics as physics
 import new_diagonalization as diagonalization
 import phonopy_funcs
 import my_math
+from material import Material
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
 	'''
@@ -161,7 +162,7 @@ class PhiMatrix():
 		jacob = 4 * np.pi / len(self.q_XYZ_list)
 		## np.sum(Ttensor, axis=0) agrees with OG code, except last two entries
 		## should be 0.
-		
+
 		# all_with_jk = Ttensor*dielec*energyterm
 		# summed = np.einsum('ijk -> i', all_with_jk)
 
@@ -278,54 +279,15 @@ def get_results(m):
 
 	q_XYZ_list = generate_q_mesh(10**(-4), 5, 5)
 
-	[pol_energy_list, pol_T_list] = diagonalization.calculate_pol_E_T(MATERIAL, q_XYZ_list)
-
-	num_pol = len(pol_T_list[0])//2
-
-	dir_path = os.path.dirname(os.path.realpath(__file__))
-
-	POSCAR_PATH     = dir_path+"/material_data/"+MATERIAL+"/POSCAR"
-	FORCE_SETS_PATH = dir_path+"/material_data/"+MATERIAL+"/FORCE_SETS"
-	BORN_PATH       = dir_path+"/material_data/"+MATERIAL+"/BORN"
-
-	phonon_file = phonopy.load(		supercell_matrix=supercell_data[MATERIAL],
-									primitive_matrix='auto',
-						  			unitcell_filename=POSCAR_PATH,
-						  			force_sets_filename=FORCE_SETS_PATH
-						  		)
-
-	[	num_atoms,
-		num_modes,
-		pos_red_to_XYZ,
-		pos_XYZ_to_red,
-		recip_red_to_XYZ,
-		recip_XYZ_to_red,
-		eq_positions,
-		atom_masses,
-		born,
-		dielectric,
-		V_PC		] = phonopy_funcs.get_phonon_file_data(phonon_file, MATERIAL)
-
-	m_cell = np.sum(atom_masses)
-
-	# width_list = 10**(-2)*pol_energy_list[0]
-	width_list = 10**(-3)*np.ones((len(pol_energy_list[0])))
-	# width_list = 10**(-1)*pol_energy_list[0]
-	# width_list = 0.075*np.ones((len(pol_energy_list[0])))
-	[bare_ph_eigen, bare_ph_energy] = phonopy_funcs.run_phonopy(phonon_file,
-						physics.q_XYZ_list_to_k_red_list(q_XYZ_list, recip_XYZ_to_red))
-
-	bare_ph_energy_o = bare_ph_energy[:, 3:]
-
-	bare_ph_eigen_o = bare_ph_eigen[:, 3:, :, :]
-
-	xi_vec_list = physics.create_xi_vecs(born, bare_ph_eigen_o, atom_masses)
+	mat = Material(name=MATERIAL, q_xyz=q_XYZ_list)
+	width_list = 10**(-3)*np.ones((len(mat.UVmats[0])))
 
 	print('Computing phi matrix for '+MATERIAL+'...')
 	print()
 
-	phi_mat = calculate_phi_mat(q_XYZ_list, dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list,
-									np.array([0, 0, VE]))
+	phi_mat = calculate_phi_mat(q_XYZ_list, mat.dielectric, mat.UVmats,
+	 							mat.bare_ph_energy_o, mat.xi_vec_list,
+								np.array([0, 0, VE]))
 
 	##### transfer matrix will go here. #####
 
@@ -354,30 +316,33 @@ def get_results(m):
 
 		num_m = int(1.e6)
 		m_list = np.logspace(-2, 0, num_m)
-		indices = np.searchsorted(m_list, pol_energy_list[0,:-2])
-		m_list = np.insert(m_list, indices, pol_energy_list[0,:-2])
+		indices = np.searchsorted(m_list, mat.energies[0,:-2])
+		m_list = np.insert(m_list, indices, mat.energies[0,:-2])
 		## to -2 in pol_energy_list to avoid acoustic modes.
 
 		if not isinstance(B_field, str):
-			reach = np.real(gayy_reach(m_list, exp, pol_energy_list, width_list,
+			reach = np.real(gayy_reach(m_list, exp, mat.energies, width_list,
 									B_field, phi_mat,
-									n_pol_cut, m_cell))
+									n_pol_cut, mat.m_cell))
 
 
 		else:
-			reach = np.real(gayy_reach_b_average(m_list, exp*b_field_mag**2, pol_energy_list,
+			reach = np.real(gayy_reach_b_average(m_list, exp*b_field_mag**2,
+												mat.energies,
 												width_list, phi_mat,
-												n_pol_cut, m_cell))
+												n_pol_cut, mat.m_cell))
 
-			reach_res = np.real(gayy_reach_b_average(pol_energy_list[0,:-2], exp*b_field_mag**2, pol_energy_list,
+			reach_res = np.real(gayy_reach_b_average(mat.energies[0,:-2],
+												exp*b_field_mag**2,
+												mat.energies,
 												width_list, phi_mat,
-												n_pol_cut, m_cell))
+												n_pol_cut, mat.m_cell))
 
 		table = pd.DataFrame({'m (eV)':m_list,
 		 					'gayy (GeV^(-1))':reach})
 		table.to_csv(fn)
 
-		table_res = pd.DataFrame({'m (eV)':pol_energy_list[0,:-2],
+		table_res = pd.DataFrame({'m (eV)':mat.energies[0,:-2],
 		 					'gayy (GeV^(-1))':reach_res})
 
 		table_res.to_csv(f'./data/{MATERIAL}_gayy_Reach_{descrip}_new_res.csv')
@@ -385,8 +350,7 @@ def get_results(m):
 
 		print('Done!')
 		print()
-		return dielectric, pol_T_list, bare_ph_energy_o, xi_vec_list, np.array([0, 0, VE])
 
 
-# for m in range(len(run_dict['materials'])):
-# 	get_results(m)
+for m in range(len(run_dict['materials'])):
+	get_results(m)
