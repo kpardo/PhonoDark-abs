@@ -71,8 +71,8 @@ def calculate_phi_mat(q_XYZ_list, dielectric, T_mat_list, bare_ph_energy_o, xi_v
 		T21_conj = np.conj(T_mat_list[q][num_pol_modes:2*num_pol_modes - 2, :num_pol_modes])
 
 		## checking with no polariton mixing
-		T11_conj = np.eye(len(T11_conj))
-		T21_conj = np.zeros(np.shape(T21_conj))
+		# T11_conj = np.eye(len(T11_conj))
+		# T21_conj = np.zeros(np.shape(T21_conj))
 
 		for lam in range(num_pol_modes-2):
 			for nu in range(num_pol_modes - 2):
@@ -253,8 +253,8 @@ exp = 1			 # kg-yr
 n_pol_cut = 3
 
 run_dict = {
-				# 'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
-				'materials': ['GaAs'],
+				'materials': ['GaAs', 'SiO2', 'Al2O3', 'CaWO4'],
+				# 'materials': ['GaAs'],
 				# 'bfield': [
 				# 			T_To_eV2*np.array([b_field_mag, 0, 0]),
 				# 			T_To_eV2*np.array([0, b_field_mag, 0]),
@@ -280,7 +280,7 @@ def get_results(m):
 	q_XYZ_list = generate_q_mesh(10**(-4), 5, 5)
 
 	mat = Material(name=MATERIAL, q_xyz=q_XYZ_list)
-	width_list = 10**(-3)*np.ones((len(mat.UVmats[0])))
+	width_list = 10**(-3)*np.ones((len(mat.energies[0])))
 
 	print('Computing phi matrix for '+MATERIAL+'...')
 	print()
@@ -319,7 +319,6 @@ def get_results(m):
 		indices = np.searchsorted(m_list, mat.energies[0,:-2])
 		m_list = np.insert(m_list, indices, mat.energies[0,:-2])
 		## to -2 in pol_energy_list to avoid acoustic modes.
-
 		if not isinstance(B_field, str):
 			reach = np.real(gayy_reach(m_list, exp, mat.energies, width_list,
 									B_field, phi_mat,
