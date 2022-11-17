@@ -351,5 +351,5 @@ def get_results(m):
 		print()
 
 
-for m in range(len(run_dict['materials'])):
-	get_results(m)
+# for m in range(len(run_dict['materials'])):
+# 	get_results(m)
