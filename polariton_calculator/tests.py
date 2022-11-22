@@ -127,3 +127,8 @@ def check_U_plus_V(T_mat):
 
 	my_math.matprint(UpV*np.conj(UpV))
 	print()
+
+
+def check_mat_sq_real():
+    ## check that mat_sq from selfenergy is real
+    pass
