@@ -43,10 +43,9 @@ class TransferMatrix:
             print("Not implemented yet!")
             sys.exit()
         else:
-            print(np.shape(me))
-            print(np.shape(self.k))
-            print(np.shape(self.mat.dielectric))
-            dot = np.dot(self.k, self.mat.dielectric)
+            if self.ground_state == 'right':
+                dot = np.dot(self.k, np.conj(self.mat.dielectric))
+            elif self.ground_state == 'left':
+                dot = np.dot(self.k, self.mat.dielectric)
             tm = np.einsum('ij, ik -> ijk', 1j*me, dot)
-            print(np.shape(tm))
         return tm
