@@ -47,5 +47,6 @@ class TransferMatrix:
             print(np.shape(self.k))
             print(np.shape(self.mat.dielectric))
             dot = np.dot(self.k, self.mat.dielectric)
-            tm = me * 1j * dot
+            tm = np.einsum('ij, ik -> ijk', 1j*me, dot)
+            print(np.shape(tm))
         return tm
