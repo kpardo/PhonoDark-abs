@@ -5,7 +5,6 @@ rate.py
 from dataclasses import dataclass
 import numpy as np
 from scipy import linalg as sla
-import new_physics as physics
 import sys
 from constants import *
 from material import Material
@@ -53,7 +52,7 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional'):
     lorentz = L_func(mass_list, mat.energies[0], width_list)
 
     prefac = RHO_DM * mass_list**(-2)
-    sumse = np.sum(selfenergy.se[::5, :, :], axis=0) ## FIXME ?
+    sumse = np.sum(selfenergy.se[::len(mat.energies[0]), :, :], axis=0) ## FIXME ?
     fullself = np.dot(lorentz, sumse)
     totself = np.sum(fullself, axis=1)
     absrate = -1. * np.imag(totself) / mass_list

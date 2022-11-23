@@ -5,7 +5,6 @@ transfer_matrix.py
 from dataclasses import dataclass
 import numpy as np
 from scipy import linalg as sla
-import physics
 import sys
 from constants import *
 from material import Material

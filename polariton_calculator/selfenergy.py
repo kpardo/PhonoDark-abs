@@ -5,7 +5,6 @@ selfenergy.py
 from dataclasses import dataclass
 import numpy as np
 from scipy import linalg as sla
-import new_physics as physics
 import sys
 from constants import *
 from material import Material

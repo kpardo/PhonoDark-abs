@@ -8,7 +8,7 @@ import os
 import phonopy
 from constants import *
 import phonopy_funcs
-import physics
+import new_physics as physics
 import my_math
 import uvmatrix as uv
 
@@ -90,8 +90,8 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 	polariton_energy_list = np.zeros((n_q, num_modes - 3 + 2))
 	polariton_T_mat_list = np.zeros((n_q, 2*(num_modes - 3 + 2), 2*(num_modes - 3 + 2)), dtype=complex)
 
-	print('Performing diagonalization...')
-	print()
+	# print('Performing diagonalization...')
+	# print()
 	for q in range(n_q):
 
 		q_vec = q_XYZ_list[q]
@@ -164,7 +164,7 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
 			print(np.array_str(T_g_Tdag, precision=4, suppress_small=True))
 
 		polariton_T_mat_list[q] = T_mat
-	print('Done!')
-	print()
+	# print('Done!')
+	# print()
 
 	return [polariton_energy_list, polariton_T_mat_list]

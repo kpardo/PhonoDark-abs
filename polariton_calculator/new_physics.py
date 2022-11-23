@@ -59,7 +59,7 @@ def create_photon_eigensys(q, dielectric, born, V_PC, atom_masses):
 	orthog_basis = my_math.create_perp_orthonormal_basis(q_dielectric)
 
 	# compute e_nu^* . dielectric . e_nup
-	projected_dielectric = np.zeros((2, 2))
+	projected_dielectric = np.zeros((2, 2), dtype=np.complex)
 
 	for nu in range(2):
 		for nup in range(2):
@@ -336,7 +336,7 @@ def get_E_mat_T_mat(h_mat, h_mat_dim):
 
 def check_phonon_eigenvectors(MATERIAL, q_XYZ_list, phonon_eigenvectors):
 
-	print('Checking phonon eigenvectors...')
+	# print('Checking phonon eigenvectors...')
 
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -410,11 +410,11 @@ def check_phonon_eigenvectors(MATERIAL, q_XYZ_list, phonon_eigenvectors):
 
 			print(orthog_check_nu)
 
-	print('Done!')
+	# print('Done!')
 
 def check_photon_eigenvectors(q_XYZ_list, dielectric, born, V_PC, atom_masses):
 
-	print('Checking photon eigenvectors...')
+	# print('Checking photon eigenvectors...')
 
 	for q in range(len(q_XYZ_list)):
 
@@ -451,7 +451,7 @@ def check_photon_eigenvectors(q_XYZ_list, dielectric, born, V_PC, atom_masses):
 			print('ERROR. e_k != e_(-k)*.')
 
 
-	print('Done!')
+	# print('Done!')
 
 def create_photon_eigenvec_list(q_list, dielectric, born, V_PC, atom_masses):
 
