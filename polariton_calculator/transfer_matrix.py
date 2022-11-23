@@ -29,18 +29,26 @@ class TransferMatrix:
         self.tm = self.get_transfer()
         return 0
 
-    def get_uv(self):
-        pass
-
     def get_mass_energy_term(self):
         return np.sqrt(2. * self.mat.m_cell * self.mat.energies)**(-1.)
 
     def get_transfer(self):
         me = self.get_mass_energy_term()
         if self.pol_mixing:
-            UV = self.get_uv()
-            print("Not implemented yet!")
-            sys.exit()
+            UV = self.mat.UVmats
+            num_pol_modes = len(UV[0])//2
+            U = UV[:,:num_pol_modes-2, :num_pol_modes]
+            V = UV[:,num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
+            if self.ground_state == 'right':
+                uvcontrib = (np.conj(U) + V)
+                dot = np.dot(self.k, np.conj(self.mat.dielectric))
+                tm_1 = np.einsum('ij, ikl -> ijkl', 1j*me, dot[:,:, np.newaxis]*uvcontrib)
+                tm = np.sum(tm_1, axis=-1)
+            elif self.ground_state == 'left':
+                uvcontrib = (U + np.conj(V))
+                dot = np.dot(self.k, self.mat.dielectric)
+                tm_1 = np.einsum('ij, ikl -> ijkl', 1j*me, dot[:,:, np.newaxis]*uvcontrib)
+                tm = np.sum(tm_1, axis=-1)
         else:
             if self.ground_state == 'right':
                 dot = np.dot(self.k, np.conj(self.mat.dielectric))

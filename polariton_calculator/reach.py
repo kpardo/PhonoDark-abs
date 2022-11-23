@@ -12,7 +12,8 @@ import transfer_matrix as tm
 import selfenergy as se
 import rate as r
 
-def reach(mass_list, q_XYZ_list, mat, n_pol_cut=3, exposure=1*KG_YR):
-    rate = r.rate(mass_list, q_XYZ_list, mat)
+def reach(mass_list, q_XYZ_list, mat, n_pol_cut=3,
+            exposure=1*KG_YR, pol_mixing=False):
+    rate = r.rate(mass_list, q_XYZ_list, mat, pol_mixing=pol_mixing)
     reach = np.sqrt(n_pol_cut / (rate * KG_YR))
     return (reach*(u.eV)**(-1)).to(1./u.GeV)

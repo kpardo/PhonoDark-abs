@@ -43,9 +43,9 @@ def L_func(omega, omega_0, width):
     	)
 
 
-def rate(mass_list, q_XYZ_list, mat, width='proportional'):
+def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     selfenergy = se.ScalarSE(nu=mat.energies, k=q_XYZ_list, j=np.ones(5), mat=mat,
-                         pol_mixing=False, lam='vi', uv_op1=r'$g_\chi \phi \bar{\psi} \psi$',
+                         pol_mixing=pol_mixing, lam='vi', uv_op1=r'$g_\chi \phi \bar{\psi} \psi$',
                         uv_op2=r'$g_\chi \phi \bar{\psi} \psi$')
     if width == 'proportional':
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
