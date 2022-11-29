@@ -6,9 +6,8 @@ Defines the UVMatrix class and subclasses.
 from dataclasses import dataclass
 import numpy as np
 from scipy import linalg as sla
-import physics
-import sys
 from constants import *
+
 
 @dataclass
 class UVMatrix:
@@ -45,19 +44,19 @@ class UVMatrix:
 
         eigen_vals, eigen_vecs = sla.eig(KgK_mat)
 
-        ## sort Umat by eigenvalues
-        ## descending order for pos. values, ascending for neg.
+        # sort Umat by eigenvalues
+        # descending order for pos. values, ascending for neg.
 
-        ## first sort by descending order
+        # first sort by descending order
         sort_index = np.argsort(eigen_vals)[::-1]
-        ## flip second half of eigenvalues
+        # flip second half of eigenvalues
         sort_index[h_mat_dim//2:] = np.flip(sort_index[h_mat_dim//2:])
-        ## get sorted eigen vecs according to sorted eigen vals.
-        U_mat = np.array(eigen_vecs[:,sort_index], dtype=complex)
+        # get sorted eigen vecs according to sorted eigen vals.
+        U_mat = np.array(eigen_vecs[:, sort_index], dtype=complex)
 
         U_mat_dag = np.conj(U_mat.T)
 
-        ## below is good unit test later.
+        # below is good unit test later.
         if not np.allclose(np.matmul(U_mat_dag, U_mat), np.identity(h_mat_dim)):
             print('Eigenvectors of h are NOT orthonormalized.')
 
@@ -70,6 +69,7 @@ class UVMatrix:
         T_mat = np.matmul(K_mat_inv, np.matmul(U_mat, sqrt_E_mat))
 
         return [E_mat, T_mat]
+
 
 @dataclass
 class UVMatPol():
@@ -92,11 +92,10 @@ class UVMatPol():
         self.h = self.get_h_matrix()
         self.E_mat, self.T_mat = UVMatrix(self.h).get_T_matrix()
 
-
     def get_n_modes(self, o_phon_energy):
-        num_phon_modes = len(o_phon_energy) + 3 ## tot num of phonons
+        num_phon_modes = len(o_phon_energy) + 3  # tot num of phonons
         num_o_phon = len(o_phon_energy)
-        num_phot_modes = 2 ## number of photon modes
+        num_phot_modes = 2  # number of photon modes
         num_pol_modes = num_phot_modes + num_o_phon
         return num_phon_modes, num_phot_modes, num_o_phon, num_pol_modes
 
@@ -107,29 +106,32 @@ class UVMatPol():
         Removes degeneracy in eigenvalues
         """
         energies = [e + split * (i - len(energies) / 2)
-         for i,e in enumerate(energies)]
+                    for i, e in enumerate(energies)]
         return energies
 
-    def get_h_matrix(self, split_en_level = 10**(-8)):
+    def get_h_matrix(self, split_en_level=10**(-8)):
         modes = self.get_n_modes(self.o_phon_energy)
         num_phon_modes, num_phot_modes, num_o_phon, num_pol_modes = modes
 
-        ## set up h matrix shape & container
+        # set up h matrix shape & container
         h_mat_dim = 2*num_pol_modes
         h_mat = np.zeros((h_mat_dim, h_mat_dim), dtype=complex)
 
-        ## split energies by a bit to remove eigenvalue degeneracies
+        # split energies by a bit to remove eigenvalue degeneracies
         o_phon_energy = self.split_energy(self.o_phon_energy, split_en_level)
-        phot_energy = np.real(self.split_energy(self.phot_energy, split_en_level))
+        phot_energy = np.real(self.split_energy(
+            self.phot_energy, split_en_level))
 
-        ## term I: free phonon
+        # term I: free phonon
         h_mat[:num_o_phon, :num_o_phon] += 0.5*np.diag(o_phon_energy)
-        h_mat[num_pol_modes:h_mat_dim-2, num_pol_modes:h_mat_dim-2] += 0.5*np.diag(o_phon_energy)
+        h_mat[num_pol_modes:h_mat_dim-2, num_pol_modes:h_mat_dim -
+              2] += 0.5*np.diag(o_phon_energy)
 
         # term II: free photon
-        h_mat[num_o_phon:h_mat_dim//2, num_o_phon:h_mat_dim//2] += 0.5*np.diag(phot_energy)
-        h_mat[h_mat_dim-2:h_mat_dim, h_mat_dim-2:h_mat_dim] += 0.5*np.diag(phot_energy)
-
+        h_mat[num_o_phon:h_mat_dim//2, num_o_phon:h_mat_dim //
+              2] += 0.5*np.diag(phot_energy)
+        h_mat[h_mat_dim-2:h_mat_dim, h_mat_dim -
+              2:h_mat_dim] += 0.5*np.diag(phot_energy)
 
         # term III: interaction term
 
@@ -142,10 +144,11 @@ class UVMatPol():
         for lam in range(num_phot_modes):
             for nu in range(num_o_phon):
 
-                a_mat[lam][nu] = (1j/4.0)*E_EM*(np.sqrt(self.V_PC))**(-1)*\
-                np.sqrt(self.dielectric_diag[lam])**(-1)*\
-                np.sqrt(o_phon_energy[nu]/phot_energy[lam])*\
-                np.dot(np.conj(self.phot_eigenvecs[lam]), self.o_xi_vec[nu])
+                a_mat[lam][nu] = (1j/4.0)*E_EM*(np.sqrt(self.V_PC))**(-1) *\
+                    np.sqrt(self.dielectric_diag[lam])**(-1) *\
+                    np.sqrt(o_phon_energy[nu]/phot_energy[lam]) *\
+                    np.dot(
+                        np.conj(self.phot_eigenvecs[lam]), self.o_xi_vec[nu])
 
         # num_modes - 3 x 2
         a_mat_dag = np.conj(a_mat.T)
@@ -164,18 +167,17 @@ class UVMatPol():
 
         q_dir = self.q_vec / np.linalg.norm(self.q_vec)
 
-        b_mat = np.array([ (1/4.0)*(E_EM**2/self.V_PC)*\
-            (np.dot(q_dir, np.matmul(self.dielectric, q_dir)))**(-1)*\
-            (np.sqrt(o_phon_energy[nu]*o_phon_energy[nup]))**(-1)*\
-            np.dot(q_dir, np.conj(self.o_xi_vec[nu]))*\
-            np.dot(q_dir,self. o_xi_vec[nup])
-            for nu in range(num_o_phon) for nup in range(num_o_phon)],
-            dtype=complex).reshape((num_o_phon, num_o_phon))
+        b_mat = np.array([(1/4.0)*(E_EM**2/self.V_PC) *
+                          (np.dot(q_dir, np.matmul(self.dielectric, q_dir)))**(-1) *
+                          (np.sqrt(o_phon_energy[nu]*o_phon_energy[nup]))**(-1) *
+                          np.dot(q_dir, np.conj(self.o_xi_vec[nu])) *
+                          np.dot(q_dir, self. o_xi_vec[nup])
+                          for nu in range(num_o_phon) for nup in range(num_o_phon)],
+                         dtype=complex).reshape((num_o_phon, num_o_phon))
         h_mat[:num_o_phon, :num_o_phon] += b_mat
         h_mat[:num_o_phon, h_mat_dim//2:h_mat_dim-2] += b_mat
         h_mat[h_mat_dim//2:h_mat_dim-2, :num_o_phon] += b_mat
         h_mat[h_mat_dim//2:h_mat_dim-2, h_mat_dim//2:h_mat_dim-2] += b_mat
-
 
         # term V: inhomogeneous mass term
 
@@ -186,10 +188,10 @@ class UVMatPol():
 
                 if l != lp:
 
-                    c_mat[l][lp] = (1/4.0)*(np.sqrt(self.dielectric_diag[l]*self.dielectric_diag[lp]))**(-1)*\
-                    (np.sqrt(phot_energy[l]*phot_energy[lp]))**(-1)*\
-                    np.dot(np.conj(self.phot_eigenvecs[l]),
-                    np.matmul(self.K_sq_mat, self.phot_eigenvecs[lp]))
+                    c_mat[l][lp] = (1/4.0)*(np.sqrt(self.dielectric_diag[l]*self.dielectric_diag[lp]))**(-1) *\
+                        (np.sqrt(phot_energy[l]*phot_energy[lp]))**(-1) *\
+                        np.dot(np.conj(self.phot_eigenvecs[l]),
+                               np.matmul(self.K_sq_mat, self.phot_eigenvecs[lp]))
 
         h_mat[num_o_phon:h_mat_dim//2, num_o_phon:h_mat_dim//2] += c_mat
         h_mat[num_o_phon:h_mat_dim//2, h_mat_dim-2:h_mat_dim] += c_mat
@@ -202,7 +204,8 @@ class UVMatPol():
             print(h_mat)
 
         if not np.all(np.linalg.eigvals(h_mat) > 0):
-            print('ERROR: h_mat is not positive definite. Cholesky decomposition will fail.')
+            print(
+                'ERROR: h_mat is not positive definite. Cholesky decomposition will fail.')
 
             print(np.linalg.eigvals(h_mat))
 
