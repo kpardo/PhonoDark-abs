@@ -10,17 +10,18 @@ from constants import *
 from material import Material
 import transfer_matrix as tm
 
+
 @dataclass
 class SelfEnergy:
     nu: np.ndarray
     k: np.ndarray
-    j: np.ndarray
     mat: Material
     pol_mixing: bool
     lam: str
 
     def __post_init__(self):
         pass
+
 
 @dataclass
 class ScalarSE(SelfEnergy):
@@ -33,12 +34,12 @@ class ScalarSE(SelfEnergy):
         pass
 
     def get_mat_sq(self):
-        right = tm.TransferMatrix(nu=self.nu, k=self.k, j=self.j,
-                mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                ground_state='right').tm
-        left = tm.TransferMatrix(nu=self.nu, k=self.k, j=self.j,
-                mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                ground_state='left').tm
+        right = tm.TransferMatrix(nu=self.nu, k=self.k,
+                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
+                                  ground_state='right').tm
+        left = tm.TransferMatrix(nu=self.nu, k=self.k,
+                                 mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
+                                 ground_state='left').tm
         return left*right
 
     def get_op_exp(self, op):
