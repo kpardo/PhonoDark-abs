@@ -53,11 +53,14 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
     lorentz = L_func(mass_list, mat.energies[0], width_list)
 
-    prefac = RHO_DM * mass_list**(-2)
+    prefac = RHO_DM * mass_list**(-1)
     sumse = np.sum(
         selfenergy.se[::len(mat.energies[0]), :, :], axis=0)  # FIXME ?
     fullself = np.dot(lorentz, sumse)
     totself = np.sum(fullself, axis=1)
-    absrate = -1. * np.imag(totself) / mass_list
+    # selfenergy gives -i * Self energy.
+    # so just need to take real part of that for rate.
+    absrate = np.real(totself) / mass_list
+    # FIXME: need to include vel distribution of DM here!!
     rate = prefac * absrate
     return rate
