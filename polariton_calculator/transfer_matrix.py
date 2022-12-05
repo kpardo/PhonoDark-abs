@@ -44,7 +44,6 @@ class TransferMatrix:
                 dielectricwithxi = np.matmul(
                     self.mat.xi_vec_list, np.conj(self.mat.dielectric))
                 dot = np.einsum('ijk, ik -> ij', dielectricwithxi, self.k)
-                # need to multiply in xi vec w/ dielectric.
                 tm_1 = np.einsum('ij, ikl -> ijkl', 1j*me,
                                  dot[:, :, np.newaxis]*uvcontrib)
                 tm = np.sum(tm_1, axis=-1)

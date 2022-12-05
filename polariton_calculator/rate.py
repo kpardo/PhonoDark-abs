@@ -47,13 +47,14 @@ def L_func(omega, omega_0, width):
 
 def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     selfenergy = se.ScalarSE(nu=mat.energies, k=q_XYZ_list, mat=mat,
-                             pol_mixing=pol_mixing, lam='vi', uv_op1=r'$g_\chi \phi \bar{\psi} \psi$',
-                             uv_op2=r'$g_\chi \phi \bar{\psi} \psi$')
+                             pol_mixing=pol_mixing, lam='vi', uv_op1=r'scalar',
+                             uv_op2='scalar')
+    print(np.shape(selfenergy.se))
     if width == 'proportional':
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
     lorentz = L_func(mass_list, mat.energies[0], width_list)
 
-    prefac = RHO_DM * mass_list**(-1)
+    prefac = RHO_DM * mass_list**(-2)
     sumse = np.sum(
         selfenergy.se[::len(mat.energies[0]), :, :], axis=0)  # FIXME ?
     fullself = np.dot(lorentz, sumse)

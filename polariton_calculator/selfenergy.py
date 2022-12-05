@@ -43,7 +43,7 @@ class ScalarSE(SelfEnergy):
         return left*right
 
     def get_op_exp(self, op):
-        if op == r'$g_\chi \phi \bar{\psi} \psi$':
+        if op == 'scalar':
             exp = E_EM
         else:
             print('! Not implemented !')
