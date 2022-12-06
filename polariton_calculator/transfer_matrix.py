@@ -44,7 +44,7 @@ class TransferMatrix:
                 dielectricwithxi = np.matmul(
                     self.mat.xi_vec_list, np.conj(self.mat.dielectric))
                 dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
-                tm = np.einsum('ij, ilk, ilj -> ijl',
+                tm = np.einsum('ij, ilk, ilj -> ijk',
                                1j*me, dot, uvcontrib)
                 # FIXME: need to sum over correct index. not clear yet which.
             elif self.ground_state == 'left':
@@ -52,7 +52,7 @@ class TransferMatrix:
                 dielectricwithxi = np.matmul(
                     self.mat.xi_vec_list, self.mat.dielectric)
                 dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
-                tm = np.einsum('ij, ilk, ilj -> ijl',
+                tm = np.einsum('ij, ilk, ilj -> ijk',
                                1j*me, dot, uvcontrib)
                 # FIXME: need to sum over correct index. not clear yet which.
         else:
