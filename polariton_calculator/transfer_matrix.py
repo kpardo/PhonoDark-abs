@@ -60,3 +60,8 @@ class TransferMatrix:
                 dot = np.dot(self.k, self.mat.dielectric)
             tm = np.einsum('ij, ik -> ijk', 1j*me, dot)
         return tm
+
+
+''' 
+FOR EFFECTIVE COUPLING: need to figure out how to correctly do lam. New class?
+'''
