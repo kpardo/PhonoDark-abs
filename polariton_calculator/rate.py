@@ -88,6 +88,7 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
 def rate_eff(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     selfenergy = se.EffectiveCoup(nu=mat.energies, k=q_XYZ_list, mat=mat,
                                   pol_mixing=pol_mixing, lam='vi')
+    print(np.shape(selfenergy.se))
     if width == 'proportional':
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
     lorentz = L_func(mass_list, mat.energies[0], width_list)

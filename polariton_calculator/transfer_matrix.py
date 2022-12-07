@@ -62,6 +62,36 @@ class TransferMatrix:
         return tm
 
 
-''' 
-FOR EFFECTIVE COUPLING: need to figure out how to correctly do lam. New class?
-'''
+@dataclass
+class TMEff(TransferMatrix):
+    '''
+    for effective couplings. doesn't dot dielectric with k.
+    '''
+
+    def get_transfer(self):
+        me = self.get_mass_energy_term()
+        if self.pol_mixing:
+            UV = self.mat.UVmats
+            num_pol_modes = len(UV[0])//2
+            U = UV[:, :num_pol_modes-2, :num_pol_modes]
+            V = UV[:, num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
+            if self.ground_state == 'right':
+                uvcontrib = (np.conj(U) + V)
+                dielectricwithxi = np.conj(np.matmul(
+                    self.mat.xi_vec_list, self.mat.dielectric))
+                tm = np.einsum('ij, ilk, ilj -> ijk',
+                               1j*me, dielectricwithxi, uvcontrib)
+            elif self.ground_state == 'left':
+                uvcontrib = np.conj((np.conj(U) + V))
+                dielectricwithxi = np.matmul(
+                    self.mat.xi_vec_list, self.mat.dielectric)
+                tm = np.einsum('ij, ilk, ilj -> ijk',
+                               1j*me, dielectricwithxi, uvcontrib)
+        else:
+            if self.ground_state == 'right':
+                dielec = np.conj(self.mat.dielectric)
+            elif self.ground_state == 'left':
+                dielec = self.mat.dielectric
+            # FIXME
+            tm = np.einsum('ij, ik -> ijk', 1j*me, dielec)
+        return tm

@@ -62,12 +62,12 @@ class EffectiveCoup(SelfEnergy):
         self.se = self.get_se()
 
     def get_mat_sq(self):
-        right = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                  mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
-                                  ground_state='right').tm
-        left = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                 mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
-                                 ground_state='left').tm
+        right = tm.TMEff(nu=self.nu, k=self.k,
+                         mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
+                         ground_state='right').tm
+        left = tm.TMEff(nu=self.nu, k=self.k,
+                        mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
+                        ground_state='left').tm
         return left*right
 
     def get_se(self):
