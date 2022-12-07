@@ -52,3 +52,23 @@ class ScalarSE(SelfEnergy):
         opexp1 = self.get_op_exp(self.uv_op1)
         opexp2 = self.get_op_exp(self.uv_op2)
         return 1j*opexp1*opexp2*self.mat_sq
+
+
+class EffectiveCoup(SelfEnergy):
+    coupling_const: str
+
+    def __post_init__(self):
+        self.mat_sq = self.get_mat_sq()
+        self.se = self.get_se()
+
+    def get_mat_sq(self):
+        right = tm.TransferMatrix(nu=self.nu, k=self.k,
+                                  mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
+                                  ground_state='right').tm
+        left = tm.TransferMatrix(nu=self.nu, k=self.k,
+                                 mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
+                                 ground_state='left').tm
+        return left*right
+
+    def get_se(self):
+        return 1j*E_EM**2*self.mat_sq

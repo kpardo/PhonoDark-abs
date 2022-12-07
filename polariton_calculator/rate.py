@@ -83,3 +83,25 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     absrate = -1. * np.imag(totself) / mass_list
     rate = prefac * absrate
     return rate
+
+
+def rate_eff(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
+    selfenergy = se.EffectiveCoup(nu=mat.energies, k=q_XYZ_list, mat=mat,
+                                  pol_mixing=pol_mixing, lam='vi')
+    if width == 'proportional':
+        width_list = 10**(-3)*np.ones((len(mat.energies[0])))
+    lorentz = L_func(mass_list, mat.energies[0], width_list)
+    prefac = RHO_DM * mass_list**(-2)
+    # average with B field
+    bfield = 10*T_To_eV2**2*1/3  # 10 Tesla averaged over 3 directions.
+    fullself = np.einsum('ij, ljk -> ijkl',
+                         lorentz, selfenergy.se*bfield)
+    # FIXME: should probably make a separate class for vel?
+    # for now, just using dressed up version of Tanner's code.
+    vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
+    # FIXME: need to be more careful with vel int over angles here?
+    velint = np.einsum('ijkl, l -> ij', fullself, vel_contrib)
+    totself = np.einsum('ij -> i', velint)
+    absrate = -1. * np.imag(totself) / mass_list
+    rate = prefac * absrate
+    return rate
