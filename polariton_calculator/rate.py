@@ -58,6 +58,6 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     # FIXME: need to include vel distribution of DM here!!
     # sum over kl will happen with vel distribution.
     totself = np.einsum('ijkl -> i', fullself)
-    absrate = np.abs(np.imag(totself)) / mass_list
+    absrate = -1. * np.imag(totself) / mass_list
     rate = prefac * absrate
     return rate

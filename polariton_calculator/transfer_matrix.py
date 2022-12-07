@@ -41,20 +41,18 @@ class TransferMatrix:
             V = UV[:, num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
             if self.ground_state == 'right':
                 uvcontrib = (np.conj(U) + V)
-                dielectricwithxi = np.matmul(
-                    self.mat.xi_vec_list, np.conj(self.mat.dielectric))
+                dielectricwithxi = np.conj(np.matmul(
+                    self.mat.xi_vec_list, self.mat.dielectric))
                 dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
                 tm = np.einsum('ij, ilk, ilj -> ijk',
                                1j*me, dot, uvcontrib)
-                # FIXME: need to sum over correct index. not clear yet which.
             elif self.ground_state == 'left':
-                uvcontrib = (U + np.conj(V))
+                uvcontrib = np.conj((np.conj(U) + V))
                 dielectricwithxi = np.matmul(
                     self.mat.xi_vec_list, self.mat.dielectric)
                 dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
                 tm = np.einsum('ij, ilk, ilj -> ijk',
                                1j*me, dot, uvcontrib)
-                # FIXME: need to sum over correct index. not clear yet which.
         else:
             if self.ground_state == 'right':
                 dot = np.dot(self.k, np.conj(self.mat.dielectric))
