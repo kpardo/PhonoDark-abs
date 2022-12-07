@@ -31,7 +31,6 @@ class ScalarSE(SelfEnergy):
     def __post_init__(self):
         self.mat_sq = self.get_mat_sq()
         self.se = self.get_se()
-        pass
 
     def get_mat_sq(self):
         right = tm.TransferMatrix(nu=self.nu, k=self.k,

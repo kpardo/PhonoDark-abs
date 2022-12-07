@@ -10,6 +10,7 @@ from constants import *
 from material import Material
 import transfer_matrix as tm
 import selfenergy as se
+import new_physics as physics
 
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
@@ -45,6 +46,24 @@ def L_func(omega, omega_0, width):
     )
 
 
+def get_vel_contrib(q_XYZ_list, vEVec):
+    '''
+    calculates velocity distribution function
+    Inputs: q list
+    Outputs: list of velocity distribution function evaluated at q's.
+    '''
+    q_dir = q_XYZ_list / np.linalg.norm(q_XYZ_list, axis=1)[:, np.newaxis]
+
+    # get theta/phi values
+    # q_dir has shape N x 3, columns are x,y,z
+    theta = np.arccos(q_dir[:, 2])
+    phi = np.arctan2(q_dir[:, 1], q_dir[:, 0])
+
+    int_vel_dist_val = np.array([physics.int_vel_dist(
+        t, p, vEVec)[0] for t, p in zip(theta, phi)])
+    return int_vel_dist_val
+
+
 def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     selfenergy = se.ScalarSE(nu=mat.energies, k=q_XYZ_list, mat=mat,
                              pol_mixing=pol_mixing, lam='vi', uv_op1=r'scalar',
@@ -55,9 +74,12 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     prefac = RHO_DM * mass_list**(-2)
     fullself = np.einsum('ij, ljk -> ijkl',
                          lorentz, selfenergy.se)
-    # FIXME: need to include vel distribution of DM here!!
-    # sum over kl will happen with vel distribution.
-    totself = np.einsum('ijkl -> i', fullself)
+    # FIXME: should probably make a separate class for vel?
+    # for now, just using dressed up version of Tanner's code.
+    vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
+    # FIXME: need to be more careful with vel int over angles here?
+    velint = np.einsum('ijkl, l -> ij', fullself, vel_contrib)
+    totself = np.einsum('ij -> i', velint)
     absrate = -1. * np.imag(totself) / mass_list
     rate = prefac * absrate
     return rate
