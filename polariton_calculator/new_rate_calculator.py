@@ -157,8 +157,7 @@ class PhiMatrix():
 
     def get_phi(self):
         '''
-        gets phi matrix...but gets wrong phi matrix.
-        ##FIX
+        gets phi matrix
         '''
         int_vel_dist_val = self.get_vel_contrib(self.q_XYZ_list, self.vEVec)
         Ttensor1, Ttensor2 = self.get_phonon_polariton_contrib()

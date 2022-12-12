@@ -71,4 +71,4 @@ class EffectiveCoup(SelfEnergy):
         return left*right
 
     def get_se(self):
-        return 1j*E_EM**2*self.mat_sq
+        return 1j*self.mat_sq

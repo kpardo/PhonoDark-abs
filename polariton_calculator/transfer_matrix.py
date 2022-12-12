@@ -30,7 +30,7 @@ class TransferMatrix:
         return 0
 
     def get_mass_energy_term(self):
-        return np.sqrt(2. * self.mat.m_cell * self.mat.energies)**(-1.)
+        return (2. * self.mat.energies)**(-0.25)
 
     def get_transfer(self):
         me = self.get_mass_energy_term()
@@ -69,7 +69,7 @@ class TMEff(TransferMatrix):
     '''
 
     def get_transfer(self):
-        me = self.get_mass_energy_term()
+        me = self.get_mass_energy_term(pol_mixing=self.pol_mixing)
         if self.pol_mixing:
             UV = self.mat.UVmats
             num_pol_modes = len(UV[0])//2
@@ -79,19 +79,28 @@ class TMEff(TransferMatrix):
                 uvcontrib = (np.conj(U) + V)
                 dielectricwithxi = np.conj(np.matmul(
                     self.mat.xi_vec_list, self.mat.dielectric))
-                tm = np.einsum('ij, ilk, ilj -> ijk',
+                print(np.shape(me), np.shape(
+                    dielectricwithxi), np.shape(uvcontrib))
+                tm = np.einsum('ijm, ilk, ilj -> ijlk',
                                1j*me, dielectricwithxi, uvcontrib)
             elif self.ground_state == 'left':
                 uvcontrib = np.conj((np.conj(U) + V))
                 dielectricwithxi = np.matmul(
                     self.mat.xi_vec_list, self.mat.dielectric)
-                tm = np.einsum('ij, ilk, ilj -> ijk',
+                tm = np.einsum('ijm, ilk, ilj -> ijlk',
                                1j*me, dielectricwithxi, uvcontrib)
         else:
             if self.ground_state == 'right':
                 dielec = np.conj(self.mat.dielectric)
             elif self.ground_state == 'left':
                 dielec = self.mat.dielectric
-            # FIXME
-            tm = np.einsum('ij, ik -> ijk', 1j*me, dielec)
+            tm = np.einsum('ij, kl -> ijkl', 1j*me, dielec)
         return tm
+
+    def get_mass_energy_term(self, pol_mixing=False):
+        if pol_mixing:
+            energy = (np.einsum('ij, ik -> ijk', self.mat.energies,
+                                self.mat.energies))**(-0.25)
+        else:
+            energy = (2. * self.mat.energies)**(-0.25)
+        return energy
