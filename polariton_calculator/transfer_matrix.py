@@ -30,7 +30,7 @@ class TransferMatrix:
         return 0
 
     def get_mass_energy_term(self):
-        return (2. * self.mat.energies)**(-0.25)
+        return (2. * self.mat.bare_ph_energy_o)**(-0.25)
 
     def get_transfer(self):
         me = self.get_mass_energy_term()
@@ -75,19 +75,19 @@ class TMEff(TransferMatrix):
             num_pol_modes = len(UV[0])//2
             U = UV[:, :num_pol_modes-2, :num_pol_modes]
             V = UV[:, num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
+            # FIXME: Don't understand why I need inv dielectric ?
+            # FIXME: Also why conj(U)+conj(V) instead of just conj(U) + V?
             if self.ground_state == 'right':
-                uvcontrib = (np.conj(U) + V)
+                uvcontrib = (np.conj(U) + np.conj(V))
                 dielectricwithxi = np.conj(np.matmul(
-                    self.mat.xi_vec_list, self.mat.dielectric))
-                print(np.shape(me), np.shape(
-                    dielectricwithxi), np.shape(uvcontrib))
-                tm = np.einsum('ijm, ilk, ilj -> ijlk',
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric)))
+                tm = np.einsum('ijl, ija, ijk -> ijkla',
                                1j*me, dielectricwithxi, uvcontrib)
             elif self.ground_state == 'left':
-                uvcontrib = np.conj((np.conj(U) + V))
+                uvcontrib = np.conj(np.conj(U) + np.conj(V))
                 dielectricwithxi = np.matmul(
-                    self.mat.xi_vec_list, self.mat.dielectric)
-                tm = np.einsum('ijm, ilk, ilj -> ijlk',
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric))
+                tm = np.einsum('ijl, ilb, ilk -> ijklb',
                                1j*me, dielectricwithxi, uvcontrib)
         else:
             if self.ground_state == 'right':
@@ -99,8 +99,8 @@ class TMEff(TransferMatrix):
 
     def get_mass_energy_term(self, pol_mixing=False):
         if pol_mixing:
-            energy = (np.einsum('ij, ik -> ijk', self.mat.energies,
-                                self.mat.energies))**(-0.25)
+            energy = (np.einsum('ij, ik -> ijk', self.mat.bare_ph_energy_o,
+                                self.mat.bare_ph_energy_o))**(-0.25)
         else:
-            energy = (2. * self.mat.energies)**(-0.25)
+            energy = (2. * self.mat.bare_ph_energy_o)**(-0.25)
         return energy

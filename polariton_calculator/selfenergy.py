@@ -68,7 +68,8 @@ class EffectiveCoup(SelfEnergy):
         left = tm.TMEff(nu=self.nu, k=self.k,
                         mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
                         ground_state='left').tm
-        return left*right
+        matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
+        return matsq
 
     def get_se(self):
         return 1j*self.mat_sq
