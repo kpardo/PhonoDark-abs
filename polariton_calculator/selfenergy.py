@@ -39,10 +39,10 @@ class ScalarSE(SelfEnergy):
         left = tm.TransferMatrix(nu=self.nu, k=self.k,
                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
                                  ground_state='left').tm
-        if self.pol_mixing:
-            matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
-        else:
-            matsq = left*right
+        # if self.pol_mixing:
+        matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
+        # else:
+        #     matsq = left*right
         return matsq
 
     def get_op_exp(self, op):

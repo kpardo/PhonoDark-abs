@@ -95,11 +95,31 @@ class TMEff(TransferMatrix):
                 tm = np.einsum('ijl, ilb, ilk -> ijklb',
                                1j*me, dielectricwithxi, uvcontrib)
         else:
+            # if self.ground_state == 'right':
+            #     dielec = np.conj(np.linalg.inv(self.mat.dielectric))
+            # elif self.ground_state == 'left':
+            #     dielec = np.lingalg.inv(self.mat.dielectric)
+            # tm = np.einsum('ij, kl -> ijkl', 1j*me, dielec)
+            UV = self.mat.UVmats
+            num_pol_modes = len(UV[0])//2
+            U = UV[:, :num_pol_modes-2, :num_pol_modes]
+            V = UV[:, num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
+            U = np.zeros(np.shape(U))
+            for i in range(len(U[0, :, 0])):
+                U[:, i, i] = 1
+            V = np.zeros(np.shape(V))
             if self.ground_state == 'right':
-                dielec = np.conj(np.linalg.inv(self.mat.dielectric))
+                uvcontrib = (np.conj(U) + np.conj(V))
+                dielectricwithxi = np.conj(np.matmul(
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric)))
+                tm = np.einsum('ijl, ija, ijk -> ijkla',
+                               1j*me, dielectricwithxi, uvcontrib)
             elif self.ground_state == 'left':
-                dielec = np.lingalg.inv(self.mat.dielectric)
-            tm = np.einsum('ij, kl -> ijkl', 1j*me, dielec)
+                uvcontrib = np.conj(np.conj(U) + np.conj(V))
+                dielectricwithxi = np.matmul(
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric))
+                tm = np.einsum('ijl, ilb, ilk -> ijklb',
+                               1j*me, dielectricwithxi, uvcontrib)
         return tm
 
     def get_mass_energy_term(self, pol_mixing=False):
