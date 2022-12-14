@@ -29,35 +29,40 @@ class TransferMatrix:
         self.tm = self.get_transfer()
         return 0
 
-    def get_mass_energy_term(self):
-        return (2. * self.mat.bare_ph_energy_o)**(-0.25)
+    def get_mass_energy_term(self, pol_mixing=False):
+        if pol_mixing:
+            energy = (np.einsum('ij, ik -> ijk', self.mat.bare_ph_energy_o,
+                                self.mat.bare_ph_energy_o))**(-0.25)
+        else:
+            energy = (2. * self.mat.bare_ph_energy_o)**(-0.25)
+        return energy
 
     def get_transfer(self):
-        me = self.get_mass_energy_term()
+        me = self.get_mass_energy_term(pol_mixing=self.pol_mixing)
         if self.pol_mixing:
             UV = self.mat.UVmats
             num_pol_modes = len(UV[0])//2
             U = UV[:, :num_pol_modes-2, :num_pol_modes]
             V = UV[:, num_pol_modes:2*num_pol_modes - 2, :num_pol_modes]
             if self.ground_state == 'right':
-                uvcontrib = (np.conj(U) + V)
+                uvcontrib = (np.conj(U) + np.conj(V))
                 dielectricwithxi = np.conj(np.matmul(
-                    self.mat.xi_vec_list, self.mat.dielectric))
-                dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
-                tm = np.einsum('ij, ilk, ilj -> ijk',
-                               1j*me, dot, uvcontrib)
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric)))
+                # dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
+                tm = np.einsum('ijl, ija, ijk -> ijkla',
+                               1j*me, dielectricwithxi, uvcontrib)
             elif self.ground_state == 'left':
-                uvcontrib = np.conj((np.conj(U) + V))
+                uvcontrib = np.conj(np.conj(U) + np.conj(V))
                 dielectricwithxi = np.matmul(
-                    self.mat.xi_vec_list, self.mat.dielectric)
-                dot = np.einsum('ijk, ik -> ijk', dielectricwithxi, self.k)
-                tm = np.einsum('ij, ilk, ilj -> ijk',
-                               1j*me, dot, uvcontrib)
+                    self.mat.xi_vec_list, np.linalg.inv(self.mat.dielectric))
+                tm = np.einsum('ijl, ilb, ilk -> ijklb',
+                               1j*me, dielectricwithxi, uvcontrib)
         else:
             if self.ground_state == 'right':
-                dot = np.dot(self.k, np.conj(self.mat.dielectric))
+                dot = np.dot(self.k, np.conj(
+                    np.linalg.inv(self.mat.dielectric)))
             elif self.ground_state == 'left':
-                dot = np.dot(self.k, self.mat.dielectric)
+                dot = np.dot(self.k, np.linalg.inv(self.mat.dielectric))
             tm = np.einsum('ij, ik -> ijk', 1j*me, dot)
         return tm
 
@@ -91,9 +96,9 @@ class TMEff(TransferMatrix):
                                1j*me, dielectricwithxi, uvcontrib)
         else:
             if self.ground_state == 'right':
-                dielec = np.conj(self.mat.dielectric)
+                dielec = np.conj(np.linalg.inv(self.mat.dielectric))
             elif self.ground_state == 'left':
-                dielec = self.mat.dielectric
+                dielec = np.lingalg.inv(self.mat.dielectric)
             tm = np.einsum('ij, kl -> ijkl', 1j*me, dielec)
         return tm
 
@@ -102,5 +107,7 @@ class TMEff(TransferMatrix):
             energy = (np.einsum('ij, ik -> ijk', self.mat.bare_ph_energy_o,
                                 self.mat.bare_ph_energy_o))**(-0.25)
         else:
-            energy = (2. * self.mat.bare_ph_energy_o)**(-0.25)
+            # energy = (2. * self.mat.bare_ph_energy_o)**(-0.25)
+            energy = (np.einsum('ij, ik -> ijk', self.mat.bare_ph_energy_o,
+                                self.mat.bare_ph_energy_o))**(-0.25)
         return energy

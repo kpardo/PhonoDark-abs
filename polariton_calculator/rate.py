@@ -71,16 +71,24 @@ def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
     if width == 'proportional':
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
     lorentz = L_func(mass_list, mat.energies[0], width_list)
-    prefac = RHO_DM * mass_list**(-2)
-    fullself = np.einsum('ij, ljk -> ijkl',
-                         lorentz, selfenergy.se)
+    prefac = RHO_DM * mass_list**(-2) * 1./mat.m_cell
     # FIXME: should probably make a separate class for vel?
     # for now, just using dressed up version of Tanner's code.
+    # dot in q vec.
+    if pol_mixing:
+        qdot = np.einsum('ikab, ia, ib -> ik', selfenergy.se,
+                         q_XYZ_list, q_XYZ_list)
+    else:
+        qdot = np.einsum('ika, ia -> ik', selfenergy.se, q_XYZ_list)
+    jacob = 4 * np.pi / len(q_XYZ_list)
     vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
     # FIXME: need to be more careful with vel int over angles here?
-    velint = np.einsum('ijkl, l -> ij', fullself, vel_contrib)
-    totself = np.einsum('ij -> i', velint)
-    absrate = -1. * np.imag(totself) / mass_list
+    velint = np.einsum('ik, i -> k', qdot, jacob * vel_contrib)
+    # now add in lorentz contribution
+    print(np.shape(qdot), np.shape(vel_contrib), np.shape(velint),
+          np.shape(lorentz))
+    totself = np.einsum('k, jk -> j', velint, lorentz)
+    absrate = -1. * np.imag(totself)
     rate = prefac * absrate
     return rate
 

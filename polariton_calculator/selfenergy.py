@@ -39,7 +39,11 @@ class ScalarSE(SelfEnergy):
         left = tm.TransferMatrix(nu=self.nu, k=self.k,
                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
                                  ground_state='left').tm
-        return left*right
+        if self.pol_mixing:
+            matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
+        else:
+            matsq = left*right
+        return matsq
 
     def get_op_exp(self, op):
         if op == 'scalar':
@@ -68,6 +72,7 @@ class EffectiveCoup(SelfEnergy):
         left = tm.TMEff(nu=self.nu, k=self.k,
                         mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
                         ground_state='left').tm
+        # sum over nu and nu'
         matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
         return matsq
 
