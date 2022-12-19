@@ -11,11 +11,15 @@ from material import Material
 import transfer_matrix as tm
 import selfenergy as se
 import rate as r
+import couplings as coup
 
 
-def reach(mass_list, q_XYZ_list, mat, n_pol_cut=3,
+def reach(mass_list, q_XYZ_list, mat, coupling=None, n_pol_cut=3,
           exposure=1*KG_YR, pol_mixing=False):
-    rate = r.rate(mass_list, q_XYZ_list, mat, pol_mixing=pol_mixing)
+    if coupling == None:
+        coupling = coup.Scalar(q_XYZ_list)
+    rate = r.rate(mass_list, q_XYZ_list, mat,
+                  coupling=coupling, pol_mixing=pol_mixing)
     reach = np.sqrt(n_pol_cut / (rate * exposure))
     return (reach*(u.eV)**(-1)).to(1./u.GeV)
 

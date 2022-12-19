@@ -11,6 +11,7 @@ from material import Material
 import transfer_matrix as tm
 import selfenergy as se
 import new_physics as physics
+import couplings as coup
 
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
@@ -64,29 +65,29 @@ def get_vel_contrib(q_XYZ_list, vEVec):
     return int_vel_dist_val
 
 
-def rate(mass_list, q_XYZ_list, mat, width='proportional', pol_mixing=False):
+def rate(mass_list, q_XYZ_list, mat, coupling=None, width='proportional', pol_mixing=True):
     selfenergy = se.ScalarSE(nu=mat.energies, k=q_XYZ_list, mat=mat,
                              pol_mixing=pol_mixing, lam='vi', uv_op1=r'scalar',
                              uv_op2='scalar')
+    if coupling == None:
+        coupling = coup.Scalar(q_XYZ_list=q_XYZ_list)
     if width == 'proportional':
         width_list = 10**(-3)*np.ones((len(mat.energies[0])))
     lorentz = L_func(mass_list, mat.energies[0], width_list)
-    prefac = RHO_DM * mass_list**(-2) * 1./mat.m_cell
+    prefac = RHO_DM * mass_list**(-2) * 1./mat.m_cell * coupling.prefac
     # FIXME: should probably make a separate class for vel?
     # for now, just using dressed up version of Tanner's code.
     # dot in q vec.
     if pol_mixing:
-        qdot = np.einsum('ikab, ia, ib -> ik', selfenergy.se,
-                         q_XYZ_list, q_XYZ_list)
+        dot = np.einsum('ikab, ia, ib -> ik', selfenergy.se,
+                        coupling.dotvec, coupling.dotvec)
     else:
-        qdot = np.einsum('ika, ia -> ik', selfenergy.se, q_XYZ_list)
+        dot = np.einsum('ika, ia -> ik', selfenergy.se, coupling.dotvec)
     jacob = 4 * np.pi / len(q_XYZ_list)
     vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
     # FIXME: need to be more careful with vel int over angles here?
-    velint = np.einsum('ik, i -> k', qdot, jacob * vel_contrib)
+    velint = np.einsum('ik, i -> k', dot, jacob * vel_contrib)
     # now add in lorentz contribution
-    print(np.shape(qdot), np.shape(vel_contrib), np.shape(velint),
-          np.shape(lorentz))
     totself = np.einsum('k, jk -> j', velint, lorentz)
     absrate = -1. * np.imag(totself)
     rate = prefac * absrate
