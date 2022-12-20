@@ -4,8 +4,6 @@ selfenergy.py
 
 from dataclasses import dataclass
 import numpy as np
-from scipy import linalg as sla
-import sys
 from constants import *
 from material import Material
 import transfer_matrix as tm
@@ -30,68 +28,10 @@ class SelfEnergy:
         left = tm.TransferMatrix(nu=self.nu, k=self.k,
                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
                                  ground_state='left').tm
-        # sum over nu and nu' --> left with
-        matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
-        return matsq
-
-    # def get_op_exp(self, op):
-    #     if op == 'scalar':
-    #         exp = E_EM
-    #     else:
-    #         print('! Not implemented !')
-    #     return exp
-
-    def get_se(self):
-        return 1j*self.mat_sq
-
-
-@dataclass
-class ScalarSE(SelfEnergy):
-    uv_op1: str
-    uv_op2: str
-
-    def __post_init__(self):
-        self.mat_sq = self.get_mat_sq()
-        self.se = self.get_se()
-
-    def get_mat_sq(self):
-        right = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                                  ground_state='right').tm
-        left = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                 mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                                 ground_state='left').tm
-        matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
-        return matsq
-
-    # def get_op_exp(self, op):
-    #     if op == 'scalar':
-    #         exp = E_EM
-    #     else:
-    #         print('! Not implemented !')
-    #     return exp
-
-    def get_se(self):
-        return 1j*self.mat_sq
-
-
-class EffectiveCoup(SelfEnergy):
-    coupling_const: str
-
-    def __post_init__(self):
-        self.mat_sq = self.get_mat_sq()
-        self.se = self.get_se()
-
-    def get_mat_sq(self):
-        right = tm.TMEff(nu=self.nu, k=self.k,
-                         mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
-                         ground_state='right').tm
-        left = tm.TMEff(nu=self.nu, k=self.k,
-                        mat=self.mat, pol_mixing=self.pol_mixing, lam='eff',
-                        ground_state='left').tm
-        # sum over nu and nu'
+        # sum over nu and nu' --> left with q, lambda, a, b
         matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
         return matsq
 
     def get_se(self):
+        # FIXME: maybe get actual full SE here?
         return 1j*self.mat_sq
