@@ -14,15 +14,18 @@ from material import Material
 class Coupling:
     texname: str
     texop: str
+    texcoupconst: str
     dotvec: np.ndarray
     prefac: np.float or np.ndarray
 
 
 @dataclass
 class Scalar:
+    q_XYZ_list: np.ndarray
     name: str = 'scalar'
     texname: str = r'$\mathrm{Scalar}$'
     texop: str = r'$g_\chi \phi \bar{\psi} \psi$'
+    texcoupconst: str = r'$g_{\chi}$'
     dotvec: np.ndarray = np.zeros((1))
     prefac: np.float = E_EM**2
 
@@ -31,13 +34,14 @@ class Scalar:
 
 
 @dataclass
-class EffectiveCoup:
+class Axion:
     q_XYZ_list: np.ndarray
     # 10 Tesla averaged over 3 directions.
     bfield: np.ndarray = 10**2 * T_To_eV2**2 * 1/3
-    name: str = 'scalar'
+    name: str = 'axion'
     texname: str = r'$\mathrm{Scalar}$'
-    texop: str = r'$g_\chi \phi \bar{\psi} \psi$'
+    texop: str = r'$g_{a\gamma\gamma} a F_{\mu\nu}F^{\mu\nu}$'
+    texcoupconst: str = r'$g_{a\gamma\gamma}$'
     dotvec: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 

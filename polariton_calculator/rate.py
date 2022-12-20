@@ -61,9 +61,8 @@ def get_vel_contrib(q_XYZ_list, vEVec):
 
 
 def rate(mass_list, q_XYZ_list, mat, coupling=None, width='proportional', pol_mixing=True):
-    selfenergy = se.ScalarSE(nu=mat.energies, k=q_XYZ_list, mat=mat,
-                             pol_mixing=pol_mixing, lam='vi', uv_op1=r'scalar',
-                             uv_op2='scalar')
+    selfenergy = se.SelfEnergy(nu=mat.energies, k=q_XYZ_list, mat=mat,
+                               pol_mixing=pol_mixing, lam='vi')
     if coupling == None:
         # set default coupling if none given as input
         coupling = coup.Scalar(q_XYZ_list=q_XYZ_list)
