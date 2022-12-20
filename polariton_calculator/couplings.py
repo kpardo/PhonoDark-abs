@@ -4,10 +4,7 @@ couplings.py
 
 from dataclasses import dataclass
 import numpy as np
-from scipy import linalg as sla
-import sys
 from constants import *
-from material import Material
 
 
 @dataclass
