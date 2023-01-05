@@ -1,0 +1,9 @@
+notes/*
+polariton_calculator/data/*
+kp/*
+polariton_calculator/*.cpython
+*/__pycache__/*
+*.ipynb
+polariton_calculator/test_plots/*
+*/.ipynb_checkpoints/*
+*.DS_Store
