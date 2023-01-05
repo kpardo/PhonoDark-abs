@@ -6,7 +6,6 @@ import numpy as np
 from constants import *
 import selfenergy as se
 import new_physics as physics
-import couplings as coup
 
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
@@ -31,17 +30,6 @@ def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
     return qxyz.reshape((num_q_theta*num_q_phi, 3))
 
 
-def L_func(omega, omega_0, width):
-    '''
-    lorentzian
-    '''
-    return (
-        4.0*omega[:, np.newaxis]*omega_0*width *
-        ((omega[:, np.newaxis]**2 - omega_0**2) **
-         2 + (omega[:, np.newaxis]*width)**2)**(-1)
-    )
-
-
 def get_vel_contrib(q_XYZ_list, vEVec):
     '''
     calculates velocity distribution function
@@ -60,31 +48,21 @@ def get_vel_contrib(q_XYZ_list, vEVec):
     return int_vel_dist_val
 
 
-def rate(mass_list, q_XYZ_list, mat, coupling=None, width='proportional', pol_mixing=True):
-    selfenergy = se.SelfEnergy(nu=mat.energies, k=q_XYZ_list, mat=mat,
-                               pol_mixing=pol_mixing, lam='vi')
-    if coupling == None:
-        # set default coupling if none given as input
-        coupling = coup.Scalar(q_XYZ_list=q_XYZ_list)
-    if width == 'proportional':
-        width_list = 10**(-3)*np.ones((len(mat.energies[0])))
-    lorentz = L_func(mass_list, mat.energies[0], width_list)
-    prefac = RHO_DM * mass_list**(-2) * 1./mat.m_cell * coupling.prefac
+def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True):
+    selfenergy = se.SelfEnergy(nu=mass_list, k=q_XYZ_list, mat=mat,
+                               coupling=coupling, pol_mixing=pol_mixing, lam='vi')
+    # Get Absorption Rate, Eqn. 1
+    absrate = -1. / mass_list * np.imag(selfenergy.se)
     # FIXME: should probably make a separate class for vel?
     # for now, just using dressed up version of Tanner's code.
-    # dot in relevant vector, given coupling type
-    if pol_mixing:
-        dot = np.einsum('ikab, ia, ib -> ik', selfenergy.se,
-                        coupling.dotvec, coupling.dotvec)
-    else:
-        # FIXME
-        dot = np.einsum('ika, ia -> ik', selfenergy.se, coupling.dotvec)
     jacob = 4 * np.pi / len(q_XYZ_list)
     vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
     # FIXME: need to be more careful with vel int over angles here?
-    velint = np.einsum('ik, i -> k', dot, jacob * vel_contrib)
-    # now add in lorentz contribution
-    totself = np.einsum('k, jk -> j', velint, lorentz)
-    absrate = -1. * np.imag(totself)
-    rate = prefac * absrate
+    velint = np.einsum('ikj, i -> kj', absrate, jacob * vel_contrib)
+    # finally sum over mat.energies -- do not sum over last 2 energies
+    # these last 2 modes are not physical -- zero energy modes.
+    totself = np.einsum('kj -> j', velint[:-2])
+    prefac = RHO_DM * mass_list**(-1) * 1./mat.m_cell
+    # Get total rate, Eqn. 2
+    rate = prefac * totself
     return rate

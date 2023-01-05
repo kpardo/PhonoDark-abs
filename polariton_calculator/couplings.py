@@ -94,7 +94,7 @@ class MagneticDipole:
 @dataclass
 class Anapole:
     q_XYZ_list: np.ndarray
-    name: str = 'anadipole'
+    name: str = 'anapole'
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi^2}\left(\partial^\nu \phi_{\mu\nu}\right)\left(\bar\psi\gamma^\mu\gamma^5\psi\right)$'
     texcoupconst: str = r'$g_{\chi}$'
