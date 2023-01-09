@@ -58,6 +58,8 @@ class SelfEnergy:
         return lorentz
 
     def get_se(self):
+        # tensor product with propagator
+        # final matrix has indices q, lambda, a, b, omega=mass_DM
         totse = np.einsum('ikab, jk -> ikabj', 1j *
                           self.coupling.prefac*self.mat_sq, self.prop)
         # dot in relevant vector, given coupling type

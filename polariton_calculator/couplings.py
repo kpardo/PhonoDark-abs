@@ -43,10 +43,11 @@ class Vector:
     texop: str = r'$g_\chi \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float = 0.
+    prefac: np.float = E_EM**2
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        self.formfac = q_XYZ_list
+        raise NotImplementedError
 
 
 @dataclass
