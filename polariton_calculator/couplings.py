@@ -14,11 +14,11 @@ class Scalar:
     texname: str = r'$\mathrm{Scalar}$'
     texop: str = r'$g_\chi \phi \bar{\psi} \psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = E_EM**2
 
     def __post_init__(self):
-        self.dotvec = self.q_XYZ_list
+        self.formfac = self.q_XYZ_list
 
 
 @dataclass
@@ -28,7 +28,7 @@ class Pseudoscalar:
     texname: str = r'$\mathrm{Pseudoscalar}$'
     texop: str = r'$g_\chi \phi\bar\psi i\gamma_5\psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -42,7 +42,7 @@ class Vector:
     texname: str = r'$\mathrm{Vector}$'
     texop: str = r'$g_\chi \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -56,7 +56,7 @@ class AxialVector:
     texname: str = r'$\mathrm{Axial~Vector}$'
     texop: str = r'$g_\chi \phi_\mu\bar\psi\gamma^\mu\gamma^5\psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -70,7 +70,7 @@ class ElectricDipole:
     texname: str = r'$\mathrm{Electric~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}i\gamma^5\psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -84,7 +84,7 @@ class MagneticDipole:
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}\psi$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -98,7 +98,7 @@ class Anapole:
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi^2}\left(\partial^\nu \phi_{\mu\nu}\right)\left(\bar\psi\gamma^\mu\gamma^5\psi\right)$'
     texcoupconst: str = r'$g_{\chi}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
@@ -115,9 +115,9 @@ class Axion:
     texname: str = r'$\mathrm{Scalar}$'
     texop: str = r'$g_{a\gamma\gamma} a F_{\mu\nu}F^{\mu\nu}$'
     texcoupconst: str = r'$g_{a\gamma\gamma}$'
-    dotvec: np.ndarray = np.zeros((1))
+    formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
 
     def __post_init__(self):
         self.prefac = E_EM**2 * self.bfield
-        self.dotvec = np.ones((np.shape(self.q_XYZ_list)))
+        self.formfac = np.ones((np.shape(self.q_XYZ_list)))

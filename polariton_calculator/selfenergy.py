@@ -63,7 +63,7 @@ class SelfEnergy:
         # dot in relevant vector, given coupling type
         if self.pol_mixing:
             se = np.einsum('ikabj, ia, ib -> ikj', totse,
-                           self.coupling.dotvec, self.coupling.dotvec)
+                           self.coupling.formfac, self.coupling.formfac)
         else:
             # FIXME
             raise NotImplementedError
