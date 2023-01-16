@@ -51,8 +51,12 @@ def get_vel_contrib(q_XYZ_list, vEVec):
 def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True):
     selfenergy = se.SelfEnergy(nu=mass_list, k=q_XYZ_list, mat=mat,
                                coupling=coupling, pol_mixing=pol_mixing, lam='vi')
+    if coupling.se_shape == 'vector':
+        sesum = np.einsum('ikjn -> ikj', selfenergy.se)
+    else:
+        sesum = selfenergy.se
     # Get Absorption Rate, Eqn. 1
-    absrate = -1. / mass_list * np.imag(selfenergy.se)
+    absrate = -1. / mass_list * np.imag(sesum)
     # FIXME: should probably make a separate class for vel?
     # for now, just using dressed up version of Tanner's code.
     jacob = 4 * np.pi / len(q_XYZ_list)

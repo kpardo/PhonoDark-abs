@@ -16,6 +16,7 @@ class Scalar:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = E_EM**2
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         self.formfac = self.q_XYZ_list
@@ -30,6 +31,7 @@ class Pseudoscalar:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         raise Warning('Not implemented fully!')
@@ -38,16 +40,19 @@ class Pseudoscalar:
 @dataclass
 class Vector:
     q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
     name: str = 'vector'
     texname: str = r'$\mathrm{Vector}$'
     texop: str = r'$g_\chi \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = E_EM**2
+    se_shape: str = 'vector'
 
     def __post_init__(self):
-        self.formfac = q_XYZ_list
-        raise NotImplementedError
+        q4vec = np.array([0, self.q_XYZ_list])
+        self.formfaci0 = self.q_XYZ_list
+        self.formfacij = np.einsum('j, ab -> jab', -1.*self.omega, np.eye(3, 3))
 
 
 @dataclass
@@ -59,6 +64,7 @@ class AxialVector:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
+    se_shape: str = 'vector'
 
     def __post_init__(self):
         raise Warning('Not implemented fully!')
@@ -87,6 +93,7 @@ class MagneticDipole:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         raise Warning('Not implemented fully!')
@@ -101,6 +108,7 @@ class Anapole:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         raise Warning('Not implemented fully!')
@@ -113,11 +121,12 @@ class Axion:
     # FIXME: implement more general b field config.
     bfield: np.ndarray = 10**2 * T_To_eV2**2 * 1/3
     name: str = 'axion'
-    texname: str = r'$\mathrm{Scalar}$'
+    texname: str = r'$\mathrm{Axion}$'
     texop: str = r'$g_{a\gamma\gamma} a F_{\mu\nu}F^{\mu\nu}$'
     texcoupconst: str = r'$g_{a\gamma\gamma}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = 0.
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         self.prefac = E_EM**2 * self.bfield

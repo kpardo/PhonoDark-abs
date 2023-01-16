@@ -64,8 +64,20 @@ class SelfEnergy:
                           self.coupling.prefac*self.mat_sq, self.prop)
         # dot in relevant vector, given coupling type
         if self.pol_mixing:
-            se = np.einsum('ikabj, ia, ib -> ikj', totse,
-                           self.coupling.formfac, self.coupling.formfac)
+            if self.coupling.se_shape == 'scalar':
+                se = np.einsum('ikabj, ia, ib -> ikj', totse,
+                               self.coupling.formfac, self.coupling.formfac)
+            else:
+                se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
+                                self.coupling.formfaci0, self.coupling.formfaci0)
+                sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
+                                self.coupling.formfacij, self.coupling.formfacij)
+                print(np.shape(se0), np.shape(sei))
+                se = np.zeros(
+                    (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=np.complex)
+                se[:, :, :, 0] = se0
+                se[:, :, :, 1:] = sei
+
         else:
             # FIXME
             raise NotImplementedError
