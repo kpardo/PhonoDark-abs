@@ -1,0 +1,85 @@
+name:      phonon
+type:      phonon
+id:        118
+status:    done
+directory: phonon
+traverse:  restart
+tasks:
+- name:      equilibrium
+  type:      structopt
+  id:        119
+  status:    done
+  directory: equilibrium
+  traverse:  restart
+- name:      disp-001
+  type:      electronic_structure
+  id:        657
+  status:    done
+  directory: disp-001
+  traverse:  restart
+- name:      disp-002
+  type:      electronic_structure
+  id:        658
+  status:    done
+  directory: disp-002
+  traverse:  restart
+- name:      disp-003
+  type:      electronic_structure
+  id:        659
+  status:    done
+  directory: disp-003
+  traverse:  restart
+lattice_tolerance: 0.100000
+stress_tolerance: 10.000000
+pressure_target: 0.000000
+force_tolerance: 0.001000
+max_increase: unset
+max_iteration: 10
+min_iteration: 1
+supercell_matrix:
+- [   2,   0,   0 ]
+- [   0,   2,   0 ]
+- [   0,   0,   2 ]
+distance: 0.010000
+lattice:
+- [     5.3185747200000000,     0.0000000000000000,     0.0000000000000000 ] # a
+- [     0.0000000000000000,     5.3185747200000000,     0.0000000000000000 ] # b
+- [    -0.0000000000000000,     0.0000000000000000,     5.3185747200000000 ] # c
+points:
+- symbol: S  # 1
+  coordinates: [  0.8817679800000000,  0.6182320200000000,  0.3817679800000000 ]
+  mass: 32.065000
+- symbol: S  # 2
+  coordinates: [  0.6182320200000000,  0.3817679800000000,  0.8817679800000000 ]
+  mass: 32.065000
+- symbol: S  # 3
+  coordinates: [  0.3817679800000000,  0.8817679800000000,  0.6182320200000000 ]
+  mass: 32.065000
+- symbol: S  # 4
+  coordinates: [  0.1182320200000000,  0.1182320200000000,  0.1182320200000000 ]
+  mass: 32.065000
+- symbol: S  # 5
+  coordinates: [  0.8817679800000000,  0.8817679800000000,  0.8817679800000000 ]
+  mass: 32.065000
+- symbol: S  # 6
+  coordinates: [  0.6182320200000000,  0.1182320200000000,  0.3817679800000000 ]
+  mass: 32.065000
+- symbol: S  # 7
+  coordinates: [  0.3817679800000000,  0.6182320200000000,  0.1182320200000000 ]
+  mass: 32.065000
+- symbol: S  # 8
+  coordinates: [  0.1182320200000000,  0.3817679800000000,  0.6182320200000000 ]
+  mass: 32.065000
+- symbol: Fe # 9
+  coordinates: [  0.5000000000000000, -0.0000000000000000, -0.0000000000000000 ]
+  mass: 55.845000
+- symbol: Fe # 10
+  coordinates: [ -0.0000000000000000, -0.0000000000000000,  0.5000000000000000 ]
+  mass: 55.845000
+- symbol: Fe # 11
+  coordinates: [ -0.0000000000000000,  0.5000000000000000, -0.0000000000000000 ]
+  mass: 55.845000
+- symbol: Fe # 12
+  coordinates: [  0.5000000000000000,  0.5000000000000000,  0.5000000000000000 ]
+  mass: 55.845000
+electric_total_energy:       -79.2578309500
