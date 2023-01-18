@@ -72,14 +72,37 @@ class SelfEnergy:
                                 self.coupling.formfaci0, self.coupling.formfaci0)
                 sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
                                 self.coupling.formfacij, self.coupling.formfacij)
-                print(np.shape(se0), np.shape(sei))
-                se = np.zeros(
+                se1 = np.zeros(
                     (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=np.complex)
-                se[:, :, :, 0] = se0
-                se[:, :, :, 1:] = sei
+                se1[:, :, :, 0] = se0
+                se1[:, :, :, 1:] = sei
+
+                se = self.mixing_contribution(se1)
 
         else:
             # FIXME
             raise NotImplementedError
         # final return has axes q, mat.energies[0], masslist=nu
         return se
+
+    def mixing_contribution(self, se):
+        '''
+        Get contribution from SM photon mixing and returns the "mostly-DM" state
+        see Eqn. 18 in draft.
+        '''
+        # FIXME
+        mixing_se = 0.
+        photon_se = self.get_photon_se()
+        print(np.shape(photon_se))
+        print(np.shape(se))
+        sums = mixing_se**2 / (self.nu**2 - photon_se)
+        final_se = se + sums
+        return final_se
+
+    def get_photon_se(self):
+        coup2 = coup.Scalar(q_XYZ_list=self.k)
+        totpse = np.einsum('ikab, jk -> ikabj', 1j *
+                           coup2.prefac*self.mat_sq, self.prop)
+        pse = np.einsum('ikabj, ia, ib -> ikj', totpse,
+                        coup2.formfac, coup2.formfac)
+        return pse

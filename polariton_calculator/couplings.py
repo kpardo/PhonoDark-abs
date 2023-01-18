@@ -50,9 +50,9 @@ class Vector:
     se_shape: str = 'vector'
 
     def __post_init__(self):
-        q4vec = np.array([0, self.q_XYZ_list])
         self.formfaci0 = self.q_XYZ_list
-        self.formfacij = np.einsum('j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+        self.formfacij = np.einsum(
+            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
 
 
 @dataclass
