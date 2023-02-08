@@ -18,7 +18,7 @@ class SelfEnergy:
     coupling: None
     lam: str
     pol_mixing: bool = True
-    width: str = 'proportional'
+    width: str = 'constant'
 
     def __post_init__(self):
         if self.coupling == None:
@@ -50,8 +50,10 @@ class SelfEnergy:
         )
 
     def get_propagator(self):
-        if self.width == 'proportional':
+        if self.width == 'constant':
             width_list = 10**(-3)*np.ones((len(self.mat.energies[0])))
+        elif self.width == 'proportional':
+            width_list = 10**(-2)*self.mat.energies[0]
         else:
             raise NotImplementedError
         lorentz = self.L_func(self.nu, self.mat.energies[0], width_list)
