@@ -79,7 +79,9 @@ class SelfEnergy:
                 se1[:, :, :, 0] = se0
                 se1[:, :, :, 1:] = sei
 
-                se = self.mixing_contribution(se1)
+                # se = self.mixing_contribution(se1)
+                # FIXME
+                se = se1
 
         else:
             # FIXME

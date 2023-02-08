@@ -26,11 +26,11 @@ class Scalar:
 class ScalarE:
     q_XYZ_list: np.ndarray
     name: str = 'scalar_e'
-    texname: str = r'$\mathrm{Scalar DM}$'
-    texop: str = r'$\frac{d_{\phi ee}}{4}\phi \bar{\psi} \psi$'
+    texname: str = r'$\mathrm{Scalar~DM}$'
+    texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float = E_EM**2 / (4 * np.pi * M_ELEC)
+    prefac: np.float = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
     se_shape: str = 'scalar'
     # coupling_cns: dict = {'ce': 1,
     #                       'cp': 0,
@@ -65,6 +65,24 @@ class Vector:
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float = E_EM**2
+    se_shape: str = 'vector'
+
+    def __post_init__(self):
+        self.formfaci0 = self.q_XYZ_list
+        self.formfacij = np.einsum(
+            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+
+
+@dataclass
+class DarkPhoton:
+    q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
+    name: str = 'dark_photon'
+    texname: str = r'$\mathrm{Vector~DM}$'
+    texop: str = r'$\kappa e \phi_\mu\bar\psi \gamma^\mu\psi$'
+    texcoupconst: str = r'$\kappa$'
+    formfac: np.ndarray = np.zeros((1))
+    prefac: np.float = 1.  # e's taken from conversion from g to kappa
     se_shape: str = 'vector'
 
     def __post_init__(self):
