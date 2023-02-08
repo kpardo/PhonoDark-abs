@@ -23,6 +23,24 @@ class Scalar:
 
 
 @dataclass
+class ScalarE:
+    q_XYZ_list: np.ndarray
+    name: str = 'scalar_e'
+    texname: str = r'$\mathrm{Scalar DM}$'
+    texop: str = r'$\frac{d_{\phi ee}}{4}\phi \bar{\psi} \psi$'
+    texcoupconst: str = r'$d_{\phi e e}$'
+    formfac: np.ndarray = np.zeros((1))
+    prefac: np.float = E_EM**2 / (4 * np.pi * M_ELEC)
+    se_shape: str = 'scalar'
+    # coupling_cns: dict = {'ce': 1,
+    #                       'cp': 0,
+    #                       'cn': 0}
+
+    def __post_init__(self):
+        self.formfac = self.q_XYZ_list
+
+
+@dataclass
 class Pseudoscalar:
     q_XYZ_list: np.ndarray
     name: str = 'pseudoscalar'

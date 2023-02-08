@@ -5,7 +5,7 @@ import numpy as np
 from scipy import special
 
 # using Natural (eV) units
-
+M_PL = 1.22*10**(19 + 9)
 M_ELEC = 511.0*10**(3)
 PI = np.pi
 E_EM = np.sqrt(4.0*PI/137.0)
