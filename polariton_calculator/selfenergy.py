@@ -18,8 +18,8 @@ class SelfEnergy:
     coupling: None
     lam: str
     pol_mixing: bool = True
-    width: str = 'constant'
-    width_val: 10**(-3)
+    width: str = 'best'
+    width_val: float = 10**(-3)
 
     def __post_init__(self):
         if self.coupling == None:
@@ -44,11 +44,18 @@ class SelfEnergy:
         '''
         lorentzian
         '''
-        return (
-            4.0*omega[:, np.newaxis]*omega_0*width *
-            ((omega[:, np.newaxis]**2 - omega_0**2) **
-             2 + (omega[:, np.newaxis]*width)**2)**(-1)
-        )
+        try:
+            return (
+                4.0*width[:, np.newaxis]*(omega[:, np.newaxis])*omega_0 *
+                ((omega[:, np.newaxis]**2 - omega_0**2) **
+                 2 + (width[:, np.newaxis]*omega[:, np.newaxis])**2)**(-1)
+            )
+        except:
+            return (
+                4.0*(omega[:, np.newaxis])*width*omega_0 *
+                ((omega[:, np.newaxis]**2 - omega_0**2) **
+                 2 + (omega[:, np.newaxis]*width)**2)**(-1)
+            )
 
     def get_propagator(self):
         if self.width == 'constant':
@@ -57,6 +64,9 @@ class SelfEnergy:
         elif self.width == 'proportional':
             # default was 10**(-2)
             width_list = self.width_val*self.mat.energies[0]
+            # width_list = self.width_val*self.nu
+        elif self.width == 'best':
+            width_list = self.width_val*self.nu**2
         else:
             raise NotImplementedError
         lorentz = self.L_func(self.nu, self.mat.energies[0], width_list)

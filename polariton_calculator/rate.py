@@ -48,10 +48,10 @@ def get_vel_contrib(q_XYZ_list, vEVec):
     return int_vel_dist_val
 
 
-def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='constant'):
+def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='best', width_val=10**(-3)):
     selfenergy = se.SelfEnergy(nu=mass_list, k=q_XYZ_list, mat=mat,
                                coupling=coupling, pol_mixing=pol_mixing,
-                               lam='vi', width=width)
+                               lam='vi', width=width, width_val=width_val)
     if coupling.se_shape == 'vector':
         sesum = np.einsum('ikjn -> ikj', selfenergy.se)
     else:
