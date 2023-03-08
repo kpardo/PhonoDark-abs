@@ -52,7 +52,8 @@ class Pseudoscalar:
     se_shape: str = 'scalar'
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        # raise Warning('Not implemented fully!')
+        print('Not implemented fully!')
 
 
 @dataclass
@@ -103,7 +104,8 @@ class AxialVector:
     se_shape: str = 'vector'
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        # raise Warning('Not implemented fully!')
+        print('Not implemented fully!')
 
 
 @dataclass
@@ -117,7 +119,8 @@ class ElectricDipole:
     prefac: np.float = 0.
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        # raise Warning('Not implemented fully!')
+        print('Not implemented fully!')
 
 
 @dataclass
@@ -132,14 +135,15 @@ class MagneticDipole:
     se_shape: str = 'scalar'
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        # raise Warning('Not implemented fully!')
+        print('Not implemented fully!')
 
 
 @dataclass
 class Anapole:
     q_XYZ_list: np.ndarray
     name: str = 'anapole'
-    texname: str = r'$\mathrm{Magnetic~Dipole}$'
+    texname: str = r'$\mathrm{Anapole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi^2}\left(\partial^\nu \phi_{\mu\nu}\right)\left(\bar\psi\gamma^\mu\gamma^5\psi\right)$'
     texcoupconst: str = r'$g_{\chi}$'
     formfac: np.ndarray = np.zeros((1))
@@ -147,7 +151,8 @@ class Anapole:
     se_shape: str = 'scalar'
 
     def __post_init__(self):
-        raise Warning('Not implemented fully!')
+        # raise Warning('Not implemented fully!')
+        print('Not implemented fully!')
 
 
 @dataclass
