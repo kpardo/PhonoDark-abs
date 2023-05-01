@@ -58,8 +58,10 @@ class Dielectric:
 
     def get_dielectric(self):
         energies, eigenvectors, vpc, atom_masses, epsinf = self.run_material_no_born()
-        if self.width_type == 'proportional':
+        if self.width_type == 'constant':
             widths = self.width_val*np.ones((len(energies)))
+        elif self.width_type == 'proportional':
+            widths = self.width_val*energies
         xi = np.einsum('jik, j, nji -> ni', self.mat.born, 1. /
                        np.sqrt(atom_masses), eigenvectors)
         # fix should be xi instead of epsilon --
