@@ -17,6 +17,8 @@ import new_diagonalization as diagonalization
 class Dielectric:
     mat: Material
     mass: np.ndarray
+    width_val: float = 0.0001
+    width_type: str = 'proportional'
 
     def __post_init__(self):
         self.dielectric = self.get_dielectric()
@@ -56,7 +58,8 @@ class Dielectric:
 
     def get_dielectric(self):
         energies, eigenvectors, vpc, atom_masses, epsinf = self.run_material_no_born()
-        widths = 0.0001*np.ones((len(energies)))
+        if self.width_type == 'proportional':
+            widths = self.width_val*np.ones((len(energies)))
         xi = np.einsum('jik, j, nji -> ni', self.mat.born, 1. /
                        np.sqrt(atom_masses), eigenvectors)
         # fix should be xi instead of epsilon --
