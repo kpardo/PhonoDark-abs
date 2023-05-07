@@ -60,22 +60,28 @@ class Dielectric:
         energies, eigenvectors, vpc, atom_masses, epsinf = self.run_material_no_born()
         if self.width_type == 'constant':
             widths = self.width_val*np.ones((len(energies)))
+            propdenom = (energies[:, np.newaxis]**2 - self.mass **
+                     2 + 1j*widths[:, np.newaxis]*self.mass)**(-1)
         elif self.width_type == 'proportional':
             widths = self.width_val*energies
+            propdenom = (energies[:, np.newaxis]**2 - self.mass **
+                     2 + 1j*widths[:, np.newaxis]*self.mass)**(-1)
+        elif self.width_type == 'best':
+            widths = self.width_val*np.ones((len(energies)))
+            propdenom = (energies[:, np.newaxis]**2 - self.mass **
+                     2 + 1j*widths[:, np.newaxis]*self.mass**2)**(-1)
         xi = np.einsum('jik, j, nji -> ni', self.mat.born, 1. /
                        np.sqrt(atom_masses), eigenvectors)
-        # fix should be xi instead of epsilon --
         eigs = np.einsum('li, lk -> lik', xi, np.conj(xi))
-        propdenom = (energies[:, np.newaxis]**2 - self.mass **
-                     2 + 1j*widths[:, np.newaxis]*self.mass)**(-1)
         fullprop = np.einsum('lik, lm -> ikm', eigs, propdenom)
-        # should have epsinf + the rest returned
         return epsinf[:, :, np.newaxis] + E_EM**2/vpc * fullprop
 
     def get_eps(self):
+        # FIXME: overall sign error?
         return 1./3.*np.trace(self.dielectric, axis1=0, axis2=1)
 
     def get_imeps(self):
+        # FIXME: overall sign error?
         # use trick from stack exchange to get inv
         # https://stackoverflow.com/questions/41850712/compute-inverse-of-2d-arrays-along-the-third-axis-in-a-3d-array-without-loops
         inv = np.linalg.inv(self.dielectric.T).T
