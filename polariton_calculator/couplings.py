@@ -91,6 +91,25 @@ class DarkPhoton:
         self.formfacij = np.einsum(
             'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
 
+@dataclass
+class U1b:
+    q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
+    name: str = 'u1b'
+    texname: str = r'$\mathrm{U}(1)\mathrm{b}$'
+    #FIXME: not sure if correct op.
+    texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
+    texcoupconst: str = r'$g_B$'
+    formfac: np.ndarray = np.zeros((1))
+    #FIXME: not sure if correct prefac?
+    prefac: np.float64 = 1.  # e's taken from conversion from g to g_B?
+    se_shape: str = 'vector'
+
+    def __post_init__(self):
+        self.formfaci0 = self.q_XYZ_list
+        self.formfacij = np.einsum(
+            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+
 
 @dataclass
 class AxialVector:

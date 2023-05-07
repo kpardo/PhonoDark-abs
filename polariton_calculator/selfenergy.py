@@ -87,7 +87,7 @@ class SelfEnergy:
             sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
                             self.coupling.formfacij, self.coupling.formfacij)
             se1 = np.zeros(
-                (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=np.complex)
+                (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
             se1[:, :, :, 0] = se0
             se1[:, :, :, 1:] = sei
 
