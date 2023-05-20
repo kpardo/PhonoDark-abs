@@ -15,6 +15,7 @@ import new_physics as physics
 import new_diagonalization as diagonalization
 import phonopy_funcs
 import uvmatrix as uv
+# import re
 
 
 @dataclass
@@ -28,7 +29,7 @@ class Material:
         self.energies, self.UVmats = self.get_energies()
         self.xi_vec_list = self.get_xi_vecs()
         self.num_pol = len(self.UVmats[0])//2
-
+        self.tex_name = self.get_fancy_name()
         return 0
 
     def get_energies(self):
@@ -85,3 +86,8 @@ class Material:
         xi_vec_list = physics.create_xi_vecs(
             self.born, self.bare_ph_eigen_o, self.atom_masses)
         return xi_vec_list
+
+    def get_fancy_name(self):
+        name = self.name
+        # FIXME
+        pass
