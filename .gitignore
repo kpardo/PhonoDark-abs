@@ -1,9 +1,10 @@
 notes/*
-polariton_calculator/data/*
-kp/*
-polariton_calculator/*.cpython
+pda/data/*
+pda/kp/*
+pda/*.cpython
 */__pycache__/*
 *.ipynb
-polariton_calculator/test_plots/*
+pda/test_plots/*
 */.ipynb_checkpoints/*
 *.DS_Store
+pda.egg-info/*
