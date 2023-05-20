@@ -6,12 +6,12 @@ import numpy as np
 from scipy import linalg as sla
 import astropy.units as u
 import sys
-from constants import *
-from material import Material
-import transfer_matrix as tm
-import selfenergy as se
-import rate as r
-import couplings as coup
+from pda.constants import *
+from pda.material import Material
+import pda.transfer_matrix as tm
+import pda.selfenergy as se
+import pda.rate as r
+import pda.couplings as coup
 
 
 def reach(mass_list, q_XYZ_list, mat, coupling=None, snr_cut=3,

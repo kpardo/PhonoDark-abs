@@ -6,10 +6,10 @@ import math
 import os
 
 import phonopy
-from constants import *
-import phonopy_funcs
-import physics
-import my_math
+from pda.constants import *
+import pda.phonopy_funcs
+import pda.physics
+import pda.my_math
 
 ###########
 

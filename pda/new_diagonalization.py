@@ -6,11 +6,12 @@ import math
 import os
 
 import phonopy
-from constants import *
-import phonopy_funcs
-import new_physics as physics
-import my_math
-import uvmatrix as uv
+from pda.constants import *
+import pda.phonopy_funcs as phonopy_funcs
+import pda.new_physics as physics
+import pda.my_math as my_math
+import pda.uvmatrix as uv
+from pda import __path__
 
 ###########
 
@@ -21,7 +22,7 @@ def calculate_pol_E_T(MATERIAL, q_XYZ_list):
     at each q-point and the T matrix
     """
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.join(os.path.dirname(__path__[0]), "data")
 
     POSCAR_PATH = dir_path+"/material_data/"+MATERIAL+"/POSCAR"
     FORCE_SETS_PATH = dir_path+"/material_data/"+MATERIAL+"/FORCE_SETS"

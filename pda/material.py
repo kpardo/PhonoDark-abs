@@ -10,11 +10,12 @@ import sys
 import phonopy
 import os
 
-from constants import *
-import new_physics as physics
-import new_diagonalization as diagonalization
-import phonopy_funcs
-import uvmatrix as uv
+from pda.constants import *
+import pda.new_physics as physics
+import pda.new_diagonalization as diagonalization
+import pda.phonopy_funcs as phonopy_funcs
+import pda.uvmatrix as uv
+from pda import __path__
 # import re
 
 
@@ -48,7 +49,7 @@ class Material:
         return pol_energy_list, pol_T_list
 
     def get_phonopy_data(self):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
+        dir_path = os.path.join(os.path.dirname(__path__[0]), "data")
         POSCAR_PATH = f"{dir_path}/material_data/{self.name}/POSCAR"
         FORCE_SETS_PATH = f"{dir_path}/material_data/{self.name}/FORCE_SETS"
         BORN_PATH = f"{dir_path}/material_data/{self.name}/BORN"

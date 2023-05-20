@@ -6,7 +6,7 @@ Defines the UVMatrix class and subclasses.
 from dataclasses import dataclass
 import numpy as np
 from scipy import linalg as sla
-from constants import *
+from pda.constants import *
 
 
 @dataclass

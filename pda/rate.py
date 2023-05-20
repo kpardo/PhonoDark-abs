@@ -3,9 +3,9 @@ rate.py
 '''
 
 import numpy as np
-from constants import *
-import selfenergy as se
-import new_physics as physics
+from pda.constants import *
+import pda.selfenergy as se
+import pda.new_physics as physics
 
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):

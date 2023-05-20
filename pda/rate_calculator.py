@@ -5,11 +5,11 @@ import numpy as np
 import phonopy
 import math
 
-from constants import *
-import physics
-import diagonalization
-import phonopy_funcs
-import my_math
+from pda.constants import *
+import pda.physics
+import pda.diagonalization
+import pda.phonopy_funcs
+import pda.my_math
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
 

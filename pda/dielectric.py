@@ -4,13 +4,13 @@ dielectric.py
 
 from dataclasses import dataclass
 import numpy as np
-from constants import *
-from material import Material
-import couplings as coup
+from pda.constants import *
+from pda.material import Material
+import pda.couplings as coup
 import phonopy
-import phonopy_funcs
-import new_physics as physics
-import new_diagonalization as diagonalization
+import pda.phonopy_funcs as phonopy_funcs
+import pda.new_physics as physics
+import pda.new_diagonalization as diagonalization
 
 
 @dataclass(kw_only=True)
@@ -27,7 +27,7 @@ class Dielectric:
 
     def run_material_no_born(self):
         name = self.mat.name
-        dir_path = '../'
+        dir_path = '../data'
         POSCAR_PATH = f"{dir_path}/material_data/{name}/POSCAR"
         FORCE_SETS_PATH = f"{dir_path}/material_data/{name}/FORCE_SETS"
         BORN_PATH = f"{dir_path}/material_data/{name}/BORN"

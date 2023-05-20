@@ -4,10 +4,10 @@ selfenergy.py
 
 from dataclasses import dataclass
 import numpy as np
-from constants import *
-from material import Material
-import couplings as coup
-import transfer_matrix as tm
+from pda.constants import *
+from pda.material import Material
+import pda.couplings as coup
+import pda.transfer_matrix as tm
 
 
 @dataclass(kw_only=True)

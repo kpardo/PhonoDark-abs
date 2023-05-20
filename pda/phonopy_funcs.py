@@ -4,7 +4,8 @@
 import os
 import phonopy
 
-from constants import *
+from pda.constants import *
+from pda import __path__
 
 
 def run_phonopy(phonon_file, k_mesh):
@@ -93,12 +94,11 @@ def get_phonon_file_data(phonon_file, material):
     recip_red_to_XYZ = np.transpose([recip_lat_a, recip_lat_b, recip_lat_c])
     recip_XYZ_to_red = np.linalg.inv(recip_red_to_XYZ)
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.join(os.path.dirname(__path__[0]), "data")
 
     POSCAR_PATH = dir_path+"/material_data/"+material+"/POSCAR"
     FORCE_SETS_PATH = dir_path+"/material_data/"+material+"/FORCE_SETS"
     BORN_PATH = dir_path+"/material_data/"+material+"/BORN"
-
     phonon_file2 = phonopy.load(
         supercell_matrix=supercell_data[material],
         primitive_matrix='auto',

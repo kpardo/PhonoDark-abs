@@ -8,12 +8,12 @@ import sys
 from dataclasses import dataclass
 import pandas as pd
 
-from constants import *
-import new_physics as physics
-import new_diagonalization as diagonalization
-import phonopy_funcs
-import my_math
-from material import Material
+from pda.constants import *
+import pda.new_physics as physics
+import pda.new_diagonalization as diagonalization
+import pda.phonopy_funcs
+import pda.my_math
+from pda.material import Material
 
 
 def generate_q_mesh(q_mag, num_q_theta, num_q_phi):

@@ -4,9 +4,9 @@ transfer_matrix.py
 
 from dataclasses import dataclass
 import numpy as np
-from constants import *
-from material import Material
-import new_physics as physics
+from pda.constants import *
+from pda.material import Material
+import pda.new_physics as physics
 
 
 @dataclass

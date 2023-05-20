@@ -10,9 +10,9 @@ import math
 import os
 import phonopy
 
-import phonopy_funcs
-from constants import *
-import my_math
+import pda.phonopy_funcs
+from pda.constants import *
+import pda.my_math
 
 import random
 

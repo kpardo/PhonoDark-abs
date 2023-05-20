@@ -10,9 +10,10 @@ import math
 import os
 import phonopy
 
-import phonopy_funcs
-from constants import *
-import my_math
+import pda.phonopy_funcs as phonopy_funcs
+from pda.constants import *
+import pda.my_math as my_math
+from pda import __path__
 
 import random
 
@@ -350,7 +351,7 @@ def check_phonon_eigenvectors(MATERIAL, q_XYZ_list, phonon_eigenvectors):
 
     # print('Checking phonon eigenvectors...')
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.join(os.path.dirname(__path__[0]), "data")
 
     POSCAR_PATH = dir_path+"/material_data/"+MATERIAL+"/POSCAR"
     FORCE_SETS_PATH = dir_path+"/material_data/"+MATERIAL+"/FORCE_SETS"
