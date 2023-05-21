@@ -81,10 +81,24 @@ class SelfEnergy:
         if self.coupling.se_shape == 'scalar':
             se = np.einsum('ikabj, ia, ib -> ikj', totse,
                            self.coupling.formfac, self.coupling.formfac)
-        else:
+        elif self.coupling.se_shape == 'vector':
             se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
                             self.coupling.formfaci0, self.coupling.formfaci0)
             sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
+                            self.coupling.formfacij, self.coupling.formfacij)
+            se1 = np.zeros(
+                (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
+            se1[:, :, :, 0] = se0
+            se1[:, :, :, 1:] = sei
+
+            # se = self.mixing_contribution(se1)
+            # FIXME
+            se = se1
+        elif self.coupling.se_shape == 'vector2':
+            ## omega is in first term, q is in second
+            se0 = np.einsum('ikabj, ja, jb -> ikj', totse,
+                            self.coupling.formfaci0, self.coupling.formfaci0)
+            sei = np.einsum('ikabj, ian, ibn -> ikjn', totse,
                             self.coupling.formfacij, self.coupling.formfacij)
             se1 = np.zeros(
                 (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)

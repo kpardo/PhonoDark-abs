@@ -175,7 +175,7 @@ class Anapole:
 
 
 @dataclass
-class Axion:
+class Axion_ExternalB:
     q_XYZ_list: np.ndarray
     # 10 Tesla averaged over 3 directions.
     # FIXME: implement more general b field config.
@@ -191,3 +191,32 @@ class Axion:
     def __post_init__(self):
         self.prefac = E_EM**2 * self.bfield
         self.formfac = np.ones((np.shape(self.q_XYZ_list)))
+
+@dataclass
+class Axion:
+    q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
+    S: np.ndarray # magnetic spin vector
+    fermion_coupling: 'e'
+    name: str = 'axion'
+    texname: str = r'$\mathrm{Axion}$'
+    formfac: np.ndarray = np.zeros((1))
+    prefac: np.float64 = 0.
+    se_shape: str = 'vector2'
+
+    def __post_init__(self):
+        self.texcoupconst = self.get_coupconst()
+        self.prefac = E_EM**2
+        self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
+        self.formfacij = np.einsum(
+            'ja, b -> jab', -2.*self.q_XYZ_list, self.S)
+
+    def get_coupconst(self):
+        if self.fermion_coupling == 'e':
+            return r'$g_{aee}$'
+        elif self.fermion_coupling == 'n':
+            return r'$g_{ann}$'
+        elif self.fermion_coupling == 'p':
+            return r'$g_{app}$'
+        else:
+            raise Warning('Not a valid fermion type!')
