@@ -51,7 +51,7 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     if mo == False:
-        matlist = ['GaAs', 'Al2O3', 'SiO2', 'FeBr2']
+        matlist = ['GaAs', 'Al2O3', 'SiO2']
     else:
         matlist = ['FeS2']
     for i, m in enumerate(matlist):
@@ -60,7 +60,8 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
         mat = material.Material(m, qs)
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
         if coupling.name == 'dark_photon':
-            reach *= const.M_ELEC/mat.m_cell
+            reach *= 1.e-9 ## FIXME -- should kappa have units??
+        print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:
         ax.legend(fontsize=16, loc='lower right')
