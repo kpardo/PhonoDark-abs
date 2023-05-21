@@ -13,6 +13,8 @@ import pda.reach as re
 import pda.constants as const
 import pda.couplings as coup
 
+from mp_api.client import MPRester
+
 
 # FIXME: put into plotting script.
 ""
@@ -116,6 +118,21 @@ y_labels = [ r'$g_{aee}$', r'$g_{ann}$', r'$g_{app}$' ]
 ax[0].set_ylim([1.e-16, 1.e-11])
 [axx.set_ylim([1.e-12, 1.e-7]) for axx in ax[1:]]
 
+## plot our limits
+matlist = ['FeBr2']
+fermions = ['e', 'n', 'p']
+for m in matlist:
+        mat = material.Material(m, qs)
+        with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
+         magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
+        S = magnetism_doc[0].magmoms
+        for i,axx in enumerate(ax):
+                 coupling = coup.Axion(qs, mlist, S, fermions[i])
+                 reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+                 axx.loglog(mlist*1000, reach, color=cs[3], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+
+
+
 ## plot other constraints
 ax[0].plot(rg['mass [eV]']*1000, rg['g'], c=cs[4], lw=2)
 ax[0].fill_between(rg['mass [eV]']*1000, rg['g'], 1.e-10*np.ones(len(rg)), alpha=0.3, color=cs[4])
@@ -166,7 +183,7 @@ ax[2].text(10**1.05, 10**-9.75, r'$\mathrm{DFSZ}$',
              rotation=20, fontsize=30, color=(0.93, 0.8, 0.58))
 
 
-
+ax[0].legend('lower right', fontsize=16)
 ## save fig.
 f.tight_layout()
 f.savefig('../results/plots/axion_fig.pdf')

@@ -205,18 +205,18 @@ class Axion:
     se_shape: str = 'vector2'
 
     def __post_init__(self):
-        self.texcoupconst = self.get_coupconst()
-        self.prefac = E_EM**2
+        self.texcoupconst, mfermion = self.get_coupconst()
+        self.prefac = 0.5*E_EM**2*M_PL/mfermion
         self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
         self.formfacij = np.einsum(
             'ja, b -> jab', -2.*self.q_XYZ_list, self.S)
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
-            return r'$g_{aee}$'
+            return r'$g_{aee}$', M_ELEC
         elif self.fermion_coupling == 'n':
-            return r'$g_{ann}$'
+            return r'$g_{ann}$', M_NEUTRON
         elif self.fermion_coupling == 'p':
-            return r'$g_{app}$'
+            return r'$g_{app}$', M_PROTON
         else:
             raise Warning('Not a valid fermion type!')
