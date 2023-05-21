@@ -209,7 +209,7 @@ class Axion:
         self.prefac = 0.5*E_EM**2*1./mfermion
         self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
         self.formfacij = np.einsum(
-            'ja, b -> jab', -2.*self.q_XYZ_list, self.S)
+            'ja, b -> jab', 2.*self.q_XYZ_list, self.S)
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
