@@ -61,6 +61,8 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
         if coupling.name == 'dark_photon':
             reach *= 1.e-9 ## FIXME -- should kappa have units??
+        if coupling.name == 'bminsl':
+            reach *= 1.e-9*(mat.m_cell*1.e-9) ## FIXME: not sure about normalization.
         print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:
@@ -90,7 +92,8 @@ ax[1].set_ylim([1.e-20, 1.e-12])
 co = coup.DarkPhoton(q_XYZ_list=qs, omega=mlist)
 plot_coupling(co, ax=ax[0], legend=True)
 
-
+co = coup.BminusL(q_XYZ_list=qs, omega=mlist)
+plot_coupling(co, ax=ax[1], legend=False)
 
 ## plot other limits
 ax[0].plot((ga_kappa['mv'].to_numpy()*u.eV).value*1000, ga_kappa['kappa'], ls='dashed', c=cs[0])
@@ -102,7 +105,7 @@ ax[1].fill_between(ff['mass [eV]'].to_numpy()*1000,
 ff['g_BL'].to_numpy(), 
 1.e-10*np.ones(len(ff)), color=cs[5], alpha=0.3
 )
-ax[1].text(1.05, -16.5, r'$\mathrm{Fifth} \; \mathrm{Force}$',
+ax[1].text(10**1.05, 10**-16.5, r'$\mathrm{Fifth} \; \mathrm{Force}$',
             rotation = 35, fontsize = 30, color = cs[5])
 
 ## save fig.

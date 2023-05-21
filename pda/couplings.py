@@ -92,14 +92,14 @@ class DarkPhoton:
             'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
 
 @dataclass
-class U1b:
+class BminusL:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
-    name: str = 'u1b'
+    name: str = 'bminsl'
     texname: str = r'$\mathrm{U}(1)\mathrm{b}$'
     #FIXME: not sure if correct op.
     texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
-    texcoupconst: str = r'$g_B$'
+    texcoupconst: str = r'$g_{B-L}$'
     formfac: np.ndarray = np.zeros((1))
     #FIXME: not sure if correct prefac?
     prefac: np.float64 = 1.  # e's taken from conversion from g to g_B?
