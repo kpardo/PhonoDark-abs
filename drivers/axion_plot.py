@@ -116,7 +116,7 @@ y_labels = [ r'$g_{aee}$', r'$g_{ann}$', r'$g_{app}$' ]
 [axx.minorticks_on() for axx in ax]
 [axx.set_xlim([10, 1000]) for axx in ax]
 ax[0].set_ylim([1.e-16, 1.e-11])
-[axx.set_ylim([1.e-12, 1.e-7]) for axx in ax[1:]]
+[axx.set_ylim([1.e-14, 1.e-7]) for axx in ax[1:]]
 
 ## plot our limits
 matlist = ['FeBr2']
@@ -129,6 +129,8 @@ for m in matlist:
         for i,axx in enumerate(ax):
                  coupling = coup.Axion(qs, mlist, S, fermions[i])
                  reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+                 reach *= 1./mat.m_cell
+                 print(np.min(reach))
                  axx.loglog(mlist*1000, reach, color=cs[3], label=f'$\mathrm{{{mat.name}}}$', lw=2)
 
 
@@ -183,7 +185,7 @@ ax[2].text(10**1.05, 10**-9.75, r'$\mathrm{DFSZ}$',
              rotation=20, fontsize=30, color=(0.93, 0.8, 0.58))
 
 
-ax[0].legend('lower right', fontsize=16)
+ax[0].legend(loc='lower right', fontsize=16)
 ## save fig.
 f.tight_layout()
 f.savefig('../results/plots/axion_fig.pdf')
