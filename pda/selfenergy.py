@@ -108,6 +108,20 @@ class SelfEnergy:
             # se = self.mixing_contribution(se1)
             # FIXME
             se = se1
+        elif self.coupling.se_shape == 'dim5':
+            ## q is in first term, w and q are in second
+            se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
+                            self.coupling.formfaci0, self.coupling.formfaci0)
+            sei = np.einsum('ikabj, jian, jibn -> ikjn', totse,
+                            self.coupling.formfacij, self.coupling.formfacij)
+            se1 = np.zeros(
+                (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
+            se1[:, :, :, 0] = se0
+            se1[:, :, :, 1:] = sei
+
+            # se = self.mixing_contribution(se1)
+            # FIXME
+            se = se1
 
         # final return has axes q, mat.energies[0], masslist=nu
         return se

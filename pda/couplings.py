@@ -130,33 +130,51 @@ class AxialVector:
 @dataclass
 class ElectricDipole:
     q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
+    mo: bool = False
     name: str = 'electricdipole'
     texname: str = r'$\mathrm{Electric~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}i\gamma^5\psi$'
-    texcoupconst: str = r'$g_{\chi}$'
+    texcoupconst: str = r'$d_{E}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
+    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
+    se_shape: str = 'dim5'
 
     def __post_init__(self):
-        # raise Warning('Not implemented fully!')
-        print('Not implemented fully!')
+        if self.mo:
+            pass
+        elif ~self.mo:
+            self.formfaci0 = np.zeros(np.shape(self.q_XYZ_list))
+            self.formfacij = np.einsum('j, abc, ic -> jiab', -1.*self.omega, self.levicivita(), self.q_XYZ_list)
+
+    def levicivita(self):
+        eijk = np.zeros((3, 3, 3))
+        eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
+        eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
+        return eijk
 
 
 @dataclass
 class MagneticDipole:
     q_XYZ_list: np.ndarray
+    omega: np.ndarray  # e.g., DM masses
+    mo: bool = False ## magnetic ordering
     name: str = 'magneticdipole'
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}\psi$'
-    texcoupconst: str = r'$g_{\chi}$'
+    texcoupconst: str = r'$d_{M}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'scalar'
+    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
+    se_shape: str = 'dim5'
 
     def __post_init__(self):
-        # raise Warning('Not implemented fully!')
-        print('Not implemented fully!')
-
+        if self.mo:
+            pass
+        elif ~self.mo:
+            self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
+            formfacij1 = np.einsum('j, ia, ib -> jiab', 2*self.omega, self.q_XYZ_list, self.q_XYZ_list)
+            formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
+            self.formfacij = formfacij1 + formfacij2
 
 @dataclass
 class Anapole:

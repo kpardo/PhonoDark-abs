@@ -81,6 +81,11 @@ y_labels = np.repeat([ r'$d_M~[\mathrm{GeV}^{-1}]$', r'$d_E~[\mathrm{GeV}^{-1}]$
 [axx.minorticks_on() for axx in ax.flatten()]
 [axx.set_xlim([10, 1000]) for axx in ax.flatten()]
 
+co = coup.MagneticDipole(q_XYZ_list=qs, omega=mlist, mo=False)
+plot_coupling(co, ax=ax[0, 0], legend=True, mo=False)
+
+co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, mo=False)
+plot_coupling(co, ax=ax[1, 0], legend=True, mo=False)
 
 ## save fig.
 f.tight_layout()
