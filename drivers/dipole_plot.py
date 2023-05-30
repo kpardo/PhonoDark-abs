@@ -13,6 +13,8 @@ import pda.reach as re
 import pda.constants as const
 import pda.couplings as coup
 
+from mp_api.client import MPRester
+
 ""
 ## set fig params
 sns.set_context("paper")
@@ -45,8 +47,10 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
     if mo == False:
         matlist = ['GaAs', 'Al2O3', 'SiO2']
     else:
-        matlist = ['FeS2']
+        matlist = ['FeBr2']
     for i, m in enumerate(matlist):
+        if mo:
+            i = 3
         if ax==None:
             print(m)
         mat = material.Material(m, qs)
@@ -81,11 +85,23 @@ y_labels = np.repeat([ r'$d_M~[\mathrm{GeV}^{-1}]$', r'$d_E~[\mathrm{GeV}^{-1}]$
 [axx.minorticks_on() for axx in ax.flatten()]
 [axx.set_xlim([10, 1000]) for axx in ax.flatten()]
 
+## get spin vec. ##FIXME: move to somewhere else. 
+with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
+         magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
+S = magnetism_doc[0].magmoms
+
+## plot our results.
 co = coup.MagneticDipole(q_XYZ_list=qs, omega=mlist, mo=False)
 plot_coupling(co, ax=ax[0, 0], legend=True, mo=False)
 
+co = coup.MagneticDipole(q_XYZ_list=qs, omega=mlist, S=S, mo=True)
+plot_coupling(co, ax=ax[0, 1], legend=True, mo=True)
+
 co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, mo=False)
 plot_coupling(co, ax=ax[1, 0], legend=True, mo=False)
+
+co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, S=S, mo=True)
+plot_coupling(co, ax=ax[1, 1], legend=True, mo=True)
 
 ## save fig.
 f.tight_layout()

@@ -52,10 +52,10 @@ def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='best
     selfenergy = se.SelfEnergy(nu=mass_list, k=q_XYZ_list, mat=mat,
                                coupling=coupling, pol_mixing=pol_mixing,
                                lam='vi', width=width, width_val=width_val)
-    if (coupling.se_shape == 'vector') or (coupling.se_shape == 'vector2') or (coupling.se_shape=='dim5'):
-        sesum = np.einsum('ikjn -> ikj', selfenergy.se)
-    else:
+    if coupling.se_shape == 'scalar':
         sesum = selfenergy.se
+    else:
+        sesum = np.einsum('ikjn -> ikj', selfenergy.se)
     # Get Absorption Rate, Eqn. 1
     absrate = -1. / mass_list * np.imag(sesum)
     # FIXME: should probably make a separate class for vel?
@@ -68,6 +68,7 @@ def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='best
     # these last 2 modes are not physical -- zero energy modes.
     totself = np.einsum('kj -> j', velint[:-2])
     prefac = RHO_DM * mass_list**(-1) * 1./mat.m_cell
-    # Get total rate, Eqn. 2
-    rate = prefac * totself
+    # Get total rate, Eqn. 2 ## FIXME added abs for ElectricDipole...need to check minus signs.
+    rate = prefac * np.abs(totself)
+    
     return rate

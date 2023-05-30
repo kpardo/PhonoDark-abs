@@ -131,6 +131,7 @@ class AxialVector:
 class ElectricDipole:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
+    S: np.ndarray = np.zeros((1)) # magnetic spin vector
     mo: bool = False
     name: str = 'electricdipole'
     texname: str = r'$\mathrm{Electric~Dipole}$'
@@ -142,7 +143,10 @@ class ElectricDipole:
 
     def __post_init__(self):
         if self.mo:
-            pass
+            self.formfaci0 = 4j*self.q_XYZ_list*np.einsum('ia,a -> ia', self.q_XYZ_list,self.S)
+            formfacij1 = -8j*np.einsum('j, ia, b -> jiab', self.omega, self.q_XYZ_list, self.S)
+            formfacij2 = 4j*np.einsum('j, ia, a, bc -> jibc', self.omega, self.q_XYZ_list, self.S, np.eye(3,3))
+            self.formfacij = formfacij1 + formfacij2
         elif ~self.mo:
             self.formfaci0 = np.zeros(np.shape(self.q_XYZ_list))
             self.formfacij = np.einsum('j, abc, ic -> jiab', -1.*self.omega, self.levicivita(), self.q_XYZ_list)
@@ -158,6 +162,7 @@ class ElectricDipole:
 class MagneticDipole:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
+    S: np.ndarray = np.zeros((1))  # magnetic spin vector
     mo: bool = False ## magnetic ordering
     name: str = 'magneticdipole'
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
@@ -169,12 +174,21 @@ class MagneticDipole:
 
     def __post_init__(self):
         if self.mo:
-            pass
+            self.se_shape = 'dim52'
+            self.formfaci0 = 4j* np.einsum('j, abc, ib, c -> jia', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
+            self.formfacij = -4j * \
+                np.einsum('j, abc, c -> jab', self.omega**2, self.levicivita(), self.S)
         elif ~self.mo:
             self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
             formfacij1 = np.einsum('j, ia, ib -> jiab', 2*self.omega, self.q_XYZ_list, self.q_XYZ_list)
             formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
             self.formfacij = formfacij1 + formfacij2
+
+    def levicivita(self):
+        eijk = np.zeros((3, 3, 3))
+        eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
+        eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
+        return eijk
 
 @dataclass
 class Anapole:
