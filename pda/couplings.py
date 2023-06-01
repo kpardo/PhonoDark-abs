@@ -101,8 +101,7 @@ class BminusL:
     texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{B-L}$'
     formfac: np.ndarray = np.zeros((1))
-    #FIXME: not sure if correct prefac?
-    prefac: np.float64 = 1.  # e's taken from conversion from g to g_B?
+    prefac: np.float64 = E_EM**2
     se_shape: str = 'vector'
 
     def __post_init__(self):

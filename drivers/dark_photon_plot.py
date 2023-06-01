@@ -59,8 +59,6 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
             print(m)
         mat = material.Material(m, qs)
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
-        if coupling.name == 'bminsl':
-            reach *= 1.e-9*(mat.m_cell*1.e-9) ## FIXME: not sure about normalization.
         print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:
