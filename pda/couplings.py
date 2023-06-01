@@ -83,7 +83,7 @@ class DarkPhoton:
     texop: str = r'$\kappa e \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$\kappa$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1.  # e's taken from conversion from g to kappa
+    prefac: np.float64 = 1. # e's cancel from conversion from g to kappa
     se_shape: str = 'vector'
 
     def __post_init__(self):

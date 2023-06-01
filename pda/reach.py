@@ -22,4 +22,6 @@ def reach(mass_list, q_XYZ_list, mat, coupling=None, snr_cut=3,
     rate = r.rate(mass_list, q_XYZ_list, mat,
                   coupling=coupling, pol_mixing=pol_mixing)
     reach = np.sqrt(snr_cut / (rate * exposure))
-    return (reach*(u.eV)**(-1)).to(1./u.GeV)
+    # return (reach*(u.eV)**(-1)).to(1./u.GeV)
+    # reach is actually dimensionless!!
+    return reach
