@@ -137,7 +137,7 @@ class ElectricDipole:
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}i\gamma^5\psi$'
     texcoupconst: str = r'$d_{E}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
+    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)**2
     se_shape: str = 'dim5'
 
     def __post_init__(self):
@@ -168,7 +168,7 @@ class MagneticDipole:
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}\psi$'
     texcoupconst: str = r'$d_{M}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
+    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)**2
     se_shape: str = 'dim5'
 
     def __post_init__(self):

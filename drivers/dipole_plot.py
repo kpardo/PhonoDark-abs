@@ -55,10 +55,6 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
             print(m)
         mat = material.Material(m, qs)
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
-        if coupling.name == 'dark_photon':
-            reach *= 1.e-9 ## FIXME -- should kappa have units??
-        if coupling.name == 'bminsl':
-            reach *= 1.e-9*(mat.m_cell*1.e-9) ## FIXME: not sure about normalization.
         if (coupling.name == 'magneticdipole') or (coupling.name == 'electricdipole'):
             reach *= 1.
         print(np.min(reach))
