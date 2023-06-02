@@ -57,9 +57,8 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
             print(m)
         mat = material.Material(m, qs)
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
-        if coupling.name == 'dark_photon':
-            reach *= const.M_ELEC/mat.m_cell
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+        print(np.min(reach))
     if legend:
         ax.legend(fontsize=16, loc='lower right')
     if ax==None:
@@ -81,12 +80,12 @@ ax.fill_between(wd['mass [eV]']*1000, wd['d_e'], 1.e30*np.ones(len(wd)), alpha=0
 plot_coupling(co, ax=ax, legend=True)
 plt.yscale('log')
 plt.xscale('log')
-plt.ylim([1.e4, 1.e9])
+plt.ylim([1.e4, 1.e11])
 plt.xlim([10, 1000])
 plt.ylabel(r'$d_e$')
 plt.xlabel(r'$m_\phi \, [\mathrm{meV}]$')
 plt.text(10**1.025, 10**4.8, r'$\mathrm{Fifth}\;\mathrm{Force}$', 
-          rotation = 55, fontsize = 25, color = cs[5])
+          rotation = 45, fontsize = 25, color = cs[5])
 plt.text(10**1.05, 10**6.75, r'$\mathrm{RG}$', fontsize = 25, color = cs[4])
 plt.text(10**1.05, 10**6.1, r'$\mathrm{WD}$', fontsize = 25, color = cs[7])
 plt.tight_layout()

@@ -30,7 +30,7 @@ class ScalarE:
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2 * (4 * np.pi) * (M_ELEC/M_PL)
+    prefac: np.float64 = 1. * (4 * np.pi) * (M_ELEC/M_PL)**2
     se_shape: str = 'scalar'
     # coupling_cns: dict = {'ce': 1,
     #                       'cp': 0,
