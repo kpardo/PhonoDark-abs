@@ -129,7 +129,7 @@ for m in matlist:
         for i,axx in enumerate(ax):
                  coupling = coup.Axion(qs, mlist, S, fermions[i])
                  reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
-                 reach *= 1./mat.m_cell
+                #  reach *= 1./mat.m_cell
                  print(np.min(reach))
                  axx.loglog(mlist*1000, reach, color=cs[3], label=f'$\mathrm{{{mat.name}}}$', lw=2)
 
