@@ -119,19 +119,26 @@ ax[0].set_ylim([1.e-16, 1.e-11])
 [axx.set_ylim([1.e-14, 1.e-7]) for axx in ax[1:]]
 
 ## plot our limits
-matlist = ['FeBr2']
+matlist = ['FeBr2', 'GaAs', 'Al2O3']
 fermions = ['e', 'n', 'p']
-for m in matlist:
+colors = [3, 0, 1]
+for j,m in enumerate(matlist):
         mat = material.Material(m, qs)
-        with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
-         magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
-        S = magnetism_doc[0].magmoms
+        if m == 'FeBr2':
+            with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
+                magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
+                S = magnetism_doc[0].magmoms
+        else:
+            S = np.array([0,0,0.5])
         for i,axx in enumerate(ax):
                  coupling = coup.Axion(qs, mlist, S, fermions[i])
                  reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
                 #  reach *= 1./mat.m_cell
                  print(np.min(reach))
-                 axx.loglog(mlist*1000, reach, color=cs[3], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+                 if m == 'FeBr2':
+                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+                 else:
+                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}}$', lw=2, ls='dashed')
 
 
 
