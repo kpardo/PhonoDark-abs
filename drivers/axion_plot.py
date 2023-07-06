@@ -138,7 +138,7 @@ for j,m in enumerate(matlist):
                  if m == 'FeBr2':
                     axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}}$', lw=2)
                  else:
-                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}}$', lw=2, ls='dashed')
+                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}} + \\mathbf{{S_\psi}} = ({S[0]}, {S[1]}, {S[2]})$', lw=2, ls='dashed')
 
 
 
