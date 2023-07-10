@@ -74,6 +74,9 @@ class Dielectric:
                        np.sqrt(atom_masses), eigenvectors)
         eigs = np.einsum('li, lk -> lik', xi, np.conj(xi))
         fullprop = np.einsum('lik, lm -> ikm', eigs, propdenom)
+        ## for mixing calcs, also save Pi_AA
+        self.piaa = energies[:, np.newaxis, np.newaxis]**2 * (E_EM**2/vpc * fullprop)
+
         return epsinf[:, :, np.newaxis] + E_EM**2/vpc * fullprop
 
     def get_eps(self):

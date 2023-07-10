@@ -8,6 +8,7 @@ from pda.constants import *
 from pda.material import Material
 import pda.couplings as coup
 import pda.transfer_matrix as tm
+import pda.dielectric as d
 
 
 @dataclass(kw_only=True)
@@ -20,6 +21,7 @@ class SelfEnergy:
     pol_mixing: bool = True
     width: str = 'best'
     width_val: float = 10**(-3)
+    mixing: bool = False
 
     def __post_init__(self):
         if self.coupling == None:
@@ -79,7 +81,7 @@ class SelfEnergy:
                           self.coupling.prefac*self.mat_sq, self.prop)
         # dot in relevant vector, given coupling type
         if self.coupling.se_shape == 'scalar':
-            se = np.einsum('ikabj, ia, ib -> ikj', totse,
+            se1 = np.einsum('ikabj, ia, ib -> ikj', totse,
                            self.coupling.formfac, self.coupling.formfac)
         elif self.coupling.se_shape == 'vector':
             se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
@@ -91,9 +93,6 @@ class SelfEnergy:
             se1[:, :, :, 0] = se0
             se1[:, :, :, 1:] = sei
 
-            # se = self.mixing_contribution(se1)
-            # FIXME
-            se = se1
         elif self.coupling.se_shape == 'vector2':
             ## omega is in first term, q is in second
             se0 = np.einsum('ikabj, ja, jb -> ikj', totse,
@@ -105,9 +104,6 @@ class SelfEnergy:
             se1[:, :, :, 0] = se0
             se1[:, :, :, 1:] = sei
 
-            # se = self.mixing_contribution(se1)
-            # FIXME
-            se = se1
         elif self.coupling.se_shape == 'dim5':
             ## q is in first term, w and q are in second
             se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
@@ -118,10 +114,6 @@ class SelfEnergy:
                 (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
             se1[:, :, :, 0] = se0
             se1[:, :, :, 1:] = sei
-
-            # se = self.mixing_contribution(se1)
-            # FIXME
-            se = se1
 
         elif self.coupling.se_shape == 'dim52':
             ## omega and q are in first term, w is in second
@@ -134,8 +126,9 @@ class SelfEnergy:
             se1[:, :, :, 0] = se0
             se1[:, :, :, 1:] = sei
 
-            # se = self.mixing_contribution(se1)
-            # FIXME
+        if self.mixing:
+            se = self.mixing_contribution(se1)
+        else:
             se = se1
 
         # final return has axes q, mat.energies[0], masslist=nu
@@ -144,21 +137,23 @@ class SelfEnergy:
     def mixing_contribution(self, se):
         '''
         Get contribution from SM photon mixing and returns the "mostly-DM" state
-        see Eqn. 18 in draft.
+        see Eqn. 6 in draft.
+        returns full SE, rather than just imaginary part. rate code takes imaginary part.
         '''
-        # FIXME
-        mixing_se = 0.
-        photon_se = self.get_photon_se()
-        print(np.shape(photon_se))
-        print(np.shape(se))
-        sums = mixing_se**2 / (self.nu**2 - photon_se)
+        # FIXME probably...this is a dummy version before we have full mixing matrices
+        mixing_se = np.zeros((3,3, len(self.nu))) ## probably need to grab from coupling??
+        piaa = self.get_photon_se()
+        mixingdot = np.einsum('ijk, ijk -> ijk', mixing_se, mixing_se)
+        fullmix =  mixingdot / (self.nu**2 - piaa)
+        sums = np.einsum('ijk -> k', fullmix)
         final_se = se + sums
+        print(final_se - se)
         return final_se
 
     def get_photon_se(self):
-        coup2 = coup.Scalar(q_XYZ_list=self.k)
-        totpse = np.einsum('ikab, jk -> ikabj', 1j *
-                           coup2.prefac*self.mat_sq, self.prop)
-        pse = np.einsum('ikabj, ia, ib -> ikj', totpse,
-                        coup2.formfac, coup2.formfac)
-        return pse
+        '''
+        \Pi_AA given by Eqn. 32 in the draft. But we can also just grab it from our dielectric code.
+        '''
+        piaa = d.Dielectric(mat=self.mat, mass=self.nu,
+                width_type=self.width, width_val=self.width_val).piaa
+        return piaa
