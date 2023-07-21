@@ -52,7 +52,7 @@ def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='best
     selfenergy = se.SelfEnergy(nu=mass_list, k=q_XYZ_list, mat=mat,
                                coupling=coupling, pol_mixing=pol_mixing,
                                lam='vi', width=width, width_val=width_val)
-    if coupling.se_shape == 'scalar':
+    if 'scalar' in coupling.se_shape:
         sesum = selfenergy.se
     else:
         sesum = np.einsum('ikjn -> ikj', selfenergy.se)

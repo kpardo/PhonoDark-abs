@@ -233,14 +233,15 @@ class Axion:
     texname: str = r'$\mathrm{Axion}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 0.
-    se_shape: str = 'vector2'
+    se_shape: str = 'scalar2'
 
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
-        self.prefac = 0.5*E_EM**2*1./mfermion
-        self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
-        self.formfacij = np.einsum(
-            'ja, b -> jab', 2.*self.q_XYZ_list, self.S)
+        self.prefac = E_EM**2*1./mfermion
+        # self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
+        # self.formfacij = np.einsum(
+            # 'ja, b -> jab', 2.*self.q_XYZ_list, self.S)
+        self.formfac = np.einsum('a,b -> ab', -1j*self.omega**2, self.S)
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
