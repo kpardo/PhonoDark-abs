@@ -22,7 +22,7 @@ kmet_per_sec_to_none = 3.34*10**(-6)
 
 T_To_eV2 = 195.27
 
-RHO_DM = 0.3*GeV_To_eV*invcmet_To_eV**3
+RHO_DM = 0.4*GeV_To_eV*invcmet_To_eV**3
 
 KG_YR = 2.69*10**58
 

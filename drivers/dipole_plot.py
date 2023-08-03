@@ -85,6 +85,7 @@ y_labels = np.repeat([ r'$d_M~[\mathrm{GeV}^{-1}]$', r'$d_E~[\mathrm{GeV}^{-1}]$
 with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
          magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
 S = magnetism_doc[0].magmoms
+print(S)
 
 ## plot our results.
 co = coup.MagneticDipole(q_XYZ_list=qs, omega=mlist, mo=False)
@@ -93,8 +94,8 @@ plot_coupling(co, ax=ax[0, 0], legend=True, mo=False)
 co = coup.MagneticDipole(q_XYZ_list=qs, omega=mlist, S=S, mo=True)
 plot_coupling(co, ax=ax[0, 1], legend=True, mo=True)
 
-co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, mo=False)
-plot_coupling(co, ax=ax[1, 0], legend=True, mo=False)
+# co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, mo=False)
+# plot_coupling(co, ax=ax[1, 0], legend=True, mo=False)
 
 co = coup.ElectricDipole(q_XYZ_list=qs, omega=mlist, S=S, mo=True)
 plot_coupling(co, ax=ax[1, 1], legend=True, mo=True)

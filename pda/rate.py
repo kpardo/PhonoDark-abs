@@ -58,17 +58,9 @@ def rate(mass_list, q_XYZ_list, mat, coupling=None, pol_mixing=True, width='best
         sesum = np.einsum('ikjn -> ikj', selfenergy.se)
     # Get Absorption Rate, Eqn. 1
     absrate = -1. / mass_list * np.imag(sesum)
-    # FIXME: should probably make a separate class for vel?
-    # for now, just using dressed up version of Tanner's code.
-    jacob = 4 * np.pi / len(q_XYZ_list)
-    vel_contrib = get_vel_contrib(q_XYZ_list, np.array([0, 0, VE]))
-    # FIXME: need to be more careful with vel int over angles here?
-    velint = np.einsum('ikj, i -> kj', absrate, jacob * vel_contrib)
-    # finally sum over mat.energies -- do not sum over last 2 energies
-    # these last 2 modes are not physical -- zero energy modes.
-    totself = np.einsum('kj -> j', velint[:-2])
+    totself = np.sum(absrate/len(q_XYZ_list),axis=0)
+    # totself = np.einsum('kj -> j', velint)
     prefac = RHO_DM * mass_list**(-1) * 1./mat.m_cell
     # Get total rate, Eqn. 2 ## FIXME added abs for ElectricDipole...need to check minus signs.
     rate = prefac * np.abs(totself)
-    
     return rate

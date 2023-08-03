@@ -19,6 +19,7 @@ class Dielectric:
     mass: np.ndarray
     width_val: float = 0.0001
     width_type: str = 'proportional'
+    piaa_needed: bool = False
 
     def __post_init__(self):
         self.dielectric = self.get_dielectric()
@@ -69,22 +70,21 @@ class Dielectric:
         elif self.width_type == 'best':
             widths = self.width_val*np.ones((len(energies)))
             propdenom = (energies[:, np.newaxis]**2 - self.mass **
-                     2 + 1j*widths[:, np.newaxis]*self.mass**2)**(-1)
+                     2 - 1j*widths[:, np.newaxis]*self.mass**2)**(-1)
         xi = np.einsum('jik, j, nji -> ni', self.mat.born, 1. /
                        np.sqrt(atom_masses), eigenvectors)
         eigs = np.einsum('li, lk -> lik', xi, np.conj(xi))
         fullprop = np.einsum('lik, lm -> ikm', eigs, propdenom)
         ## for mixing calcs, also save Pi_AA
-        self.piaa = energies[:, np.newaxis, np.newaxis]**2 * (E_EM**2/vpc * fullprop)
+        if self.piaa_needed:
+            self.piaa = energies[:, np.newaxis, np.newaxis]**2 * (E_EM**2/vpc * fullprop)
 
         return epsinf[:, :, np.newaxis] + E_EM**2/vpc * fullprop
 
     def get_eps(self):
-        # FIXME: overall sign error?
         return 1./3.*np.trace(self.dielectric, axis1=0, axis2=1)
 
     def get_imeps(self):
-        # FIXME: overall sign error?
         # use trick from stack exchange to get inv
         # https://stackoverflow.com/questions/41850712/compute-inverse-of-2d-arrays-along-the-third-axis-in-a-3d-array-without-loops
         inv = np.linalg.inv(self.dielectric.T).T

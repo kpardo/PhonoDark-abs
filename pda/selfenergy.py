@@ -32,14 +32,18 @@ class SelfEnergy:
         self.se = self.get_se()
 
     def get_mat_sq(self):
-        right = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                  mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                                  ground_state='right').tm
-        left = tm.TransferMatrix(nu=self.nu, k=self.k,
-                                 mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
-                                 ground_state='left').tm
+        T = np.einsum('j, knja -> jnka', 1./np.sqrt(self.mat.atom_masses), np.conj(self.mat.bare_ph_eigen_o))
+        Tstar = np.conj(T)
+
+        # right = tm.TransferMatrix(nu=self.nu, k=self.k,
+        #                           mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
+        #                           ground_state='right').tm
+        # left = tm.TransferMatrix(nu=self.nu, k=self.k,
+        #                          mat=self.mat, pol_mixing=self.pol_mixing, lam=self.lam,
+        #                          ground_state='left').tm
         # sum over nu and nu' --> left with q, lambda, a, b
-        matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
+        # matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
+        matsq = 1./3. * np.einsum('jnka, mnka -> jmnk', T, Tstar)
         return matsq
 
     def L_func(self, omega, omega_0, width):
@@ -68,20 +72,23 @@ class SelfEnergy:
             width_list = self.width_val*self.mat.energies[0]
             # width_list = self.width_val*self.nu
         elif self.width == 'best':
-            width_list = self.width_val*self.nu**2
+            energies = self.mat.bare_ph_energy_o[0]
+            widths = self.width_val*np.ones((len(energies)))
+            prop = (-1.*energies[:, np.newaxis]**2 + self.nu **
+                     2 + 1j*widths[:, np.newaxis]*self.nu**2)**(-1)
         else:
             raise NotImplementedError
-        lorentz = self.L_func(self.nu, self.mat.energies[0], width_list)
-        return lorentz
+        # lorentz = self.L_func(self.nu, self.mat.energies[0], width_list)
+        return prop
 
     def get_se(self):
         # tensor product with propagator
         # final matrix has indices q, lambda, a, b, omega=mass_DM
-        totse = np.einsum('ikab, jk -> ikabj', 1j *
+        totse = np.einsum('jmnk, nw -> jmkw',
                           self.coupling.prefac*self.mat_sq, self.prop)
         # dot in relevant vector, given coupling type
         if self.coupling.se_shape == 'scalar':
-            se1 = np.einsum('ikabj, ia, ib -> ikj', totse,
+            se1 = np.einsum('jmkw, jwa, mwa -> kw', totse,
                            self.coupling.formfac, self.coupling.formfac)
         elif self.coupling.se_shape == 'scalar2':
             se1 = np.einsum('ikabj, ja, jb -> ikj', totse,

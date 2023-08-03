@@ -25,19 +25,33 @@ class Scalar:
 @dataclass
 class ScalarE:
     q_XYZ_list: np.ndarray
+    omega: np.ndarray ## e.g., DM masses
+    mat: None
     name: str = 'scalar_e'
     texname: str = r'$\mathrm{Scalar~DM}$'
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1. * (4 * np.pi) * (M_ELEC/M_PL)**2
+    # prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
+    prefac: np.float64 = 1.
     se_shape: str = 'scalar'
+    mixing_phia: np.ndarray = np.zeros((1))
+    mixing: bool = False
     # coupling_cns: dict = {'ce': 1,
     #                       'cp': 0,
     #                       'cn': 0}
 
     def __post_init__(self):
-        self.formfac = self.q_XYZ_list
+        ## FIXME: need Nj for each material. Hardcoded GaAs here.
+        Nj = np.array([28, 36])
+        Vel = V0*np.array([0,0,1])
+        self.formfac =  Nj[:, np.newaxis, np.newaxis] * self.omega[:,np.newaxis]*Vel 
+        if self.mixing:
+            self.mixing_phia_prefac = 1j*E_EM*self.omega
+            self.mixing_phia_F1 = self.q_XYZ_list
+            self.mixing_phia_F2 = 1.
+            self.mixing_term2 = 1./E_EM * np.outer(self.omega, self.q_XYZ_list) * (1 - np.trace(self.mat.dielectric))
+            print(np.shape(self.mixing_term2))
 
 
 @dataclass
@@ -174,12 +188,12 @@ class MagneticDipole:
     def __post_init__(self):
         if self.mo:
             self.se_shape = 'dim52'
-            self.formfaci0 = 4j* np.einsum('j, abc, ib, c -> jia', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
-            self.formfacij = -4j * \
-                np.einsum('j, abc, c -> jab', self.omega**2, self.levicivita(), self.S)
+            self.formfaci0 = -2j* np.einsum('j, abc, ib, a -> jic', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
+            self.formfacij = -2j * \
+                np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
         elif ~self.mo:
             self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
-            formfacij1 = np.einsum('j, ia, ib -> jiab', 2*self.omega, self.q_XYZ_list, self.q_XYZ_list)
+            formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
             formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
             self.formfacij = formfacij1 + formfacij2
 
