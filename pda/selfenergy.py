@@ -91,7 +91,9 @@ class SelfEnergy:
             se1 = np.einsum('jmkw, jwa, mwa -> kw', totse,
                            self.coupling.formfac, self.coupling.formfac)
         elif self.coupling.se_shape == 'scalar2':
-            se1 = np.einsum('ikabj, ja, jb -> ikj', totse,
+            print(np.shape(self.coupling.formfac))
+            print(np.shape(totse))
+            se1 = np.einsum('jmkw, wa, wb -> kw', totse,
                            self.coupling.formfac, self.coupling.formfac)
         elif self.coupling.se_shape == 'vector':
             se0 = np.einsum('ikabj, ia, ib -> ikj', totse,

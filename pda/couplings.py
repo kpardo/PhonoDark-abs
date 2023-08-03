@@ -242,7 +242,9 @@ class Axion:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     S: np.ndarray # magnetic spin vector
-    fermion_coupling: 'e'
+    mat: None = None# don't really need, but whatever.
+    mixing: bool = False
+    fermion_coupling: str = 'e'
     name: str = 'axion'
     texname: str = r'$\mathrm{Axion}$'
     formfac: np.ndarray = np.zeros((1))
@@ -252,9 +254,6 @@ class Axion:
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
         self.prefac = E_EM**2*1./mfermion
-        # self.formfaci0 = np.einsum('a,b -> ab', -2*self.omega,self.S)
-        # self.formfacij = np.einsum(
-            # 'ja, b -> jab', 2.*self.q_XYZ_list, self.S)
         self.formfac = np.einsum('a,b -> ab', -1j*self.omega**2, self.S)
 
     def get_coupconst(self):
