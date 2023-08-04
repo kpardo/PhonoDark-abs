@@ -9,6 +9,8 @@ from scipy import linalg as sla
 import sys
 import phonopy
 import os
+import pymatgen.core as pmgCore
+import re
 
 from pda.constants import *
 import pda.new_physics as physics
@@ -59,6 +61,7 @@ class Material:
                                    unitcell_filename=POSCAR_PATH,
                                    force_sets_filename=FORCE_SETS_PATH
                                    )
+        self.Z_list = phonon_file.primitive.get_atomic_numbers()
 
         [num_atoms,
          num_modes,
@@ -87,6 +90,26 @@ class Material:
         xi_vec_list = physics.create_xi_vecs(
             self.born, self.bare_ph_eigen_o, self.atom_masses)
         return xi_vec_list
+
+    def get_Nj(self):
+        ## from Tanner
+        ## FIXME: finish.
+        composition = pmgCore.Composition(self.name)
+        oxi_state_guesses = composition.oxi_state_guesses()
+        self.symbols = re.findall(r'[A-Z][a-z]*', s)
+        
+        N_e_list = []
+        for s,symbol in enumberate(self.symbols):
+
+            oxi_number = 0
+
+            if len(oxi_state_guesses) >= 1:
+                if symbol in oxi_state_guesses[0]:
+                    oxi_number = oxi_state_guesses[0][symbol]
+            
+            N_e_list.append( self.Z_list[s] - oxi_number)
+
+        return np.array(N_e_list)
 
     def get_fancy_name(self):
         name = self.name

@@ -64,18 +64,22 @@ class SelfEnergy:
             )
 
     def get_propagator(self):
+        energies = self.mat.bare_ph_energy_o[0]
         if self.width == 'constant':
             # default was 10**(-3)
-            width_list = self.width_val*np.ones((len(self.mat.energies[0])))
+            width_list = self.width_val*np.ones((len(energies)))
+            prop = (-1.*energies[:, np.newaxis]**2 + self.nu **
+                     2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
         elif self.width == 'proportional':
             # default was 10**(-2)
-            width_list = self.width_val*self.mat.energies[0]
-            # width_list = self.width_val*self.nu
+            width_list = self.width_val*energies
+            prop = (-1.*energies[:, np.newaxis]**2 + self.nu **
+                     2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
         elif self.width == 'best':
             energies = self.mat.bare_ph_energy_o[0]
-            widths = self.width_val*np.ones((len(energies)))
+            widths = self.width_val*energies
             prop = (-1.*energies[:, np.newaxis]**2 + self.nu **
-                     2 + 1j*widths[:, np.newaxis]*self.nu**2)**(-1)
+                     2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
         else:
             raise NotImplementedError
         # lorentz = self.L_func(self.nu, self.mat.energies[0], width_list)
@@ -89,12 +93,10 @@ class SelfEnergy:
         # dot in relevant vector, given coupling type
         if self.coupling.se_shape == 'scalar':
             se1 = np.einsum('jmkw, jwa, mwa -> kw', totse,
-                           self.coupling.formfac, self.coupling.formfac)
-        elif self.coupling.se_shape == 'scalar2':
-            print(np.shape(self.coupling.formfac))
-            print(np.shape(totse))
-            se1 = np.einsum('jmkw, wa, wb -> kw', totse,
-                           self.coupling.formfac, self.coupling.formfac)
+                           self.coupling.formfac, np.conj(self.coupling.formfac))
+        # elif self.coupling.se_shape == 'scalar2':
+        #     se1 = np.einsum('jmkw, wa, wb -> kw', totse,
+        #                    self.coupling.formfac, self.coupling.formfac)
         elif self.coupling.se_shape == 'vector':
             se0 = np.einsum('ikabj, ia, ib -> ikj', totse,
                             self.coupling.formfaci0, self.coupling.formfaci0)

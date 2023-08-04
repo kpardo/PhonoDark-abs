@@ -32,8 +32,8 @@ class ScalarE:
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    # prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
-    prefac: np.float64 = 1.
+    prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
+    # prefac: np.float64 = 1.
     se_shape: str = 'scalar'
     mixing_phia: np.ndarray = np.zeros((1))
     mixing: bool = False
@@ -51,7 +51,6 @@ class ScalarE:
             self.mixing_phia_F1 = self.q_XYZ_list
             self.mixing_phia_F2 = 1.
             self.mixing_term2 = 1./E_EM * np.outer(self.omega, self.q_XYZ_list) * (1 - np.trace(self.mat.dielectric))
-            print(np.shape(self.mixing_term2))
 
 
 @dataclass
@@ -192,12 +191,14 @@ class MagneticDipole:
             self.formfacij = -2j * \
                 np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
         elif ~self.mo:
+            ## don't actually check this for non-screened.
             self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
             formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
             formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
             self.formfacij = formfacij1 + formfacij2
 
     def levicivita(self):
+        ## stack exchange, probably.
         eijk = np.zeros((3, 3, 3))
         eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
         eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
@@ -242,19 +243,22 @@ class Axion:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     S: np.ndarray # magnetic spin vector
-    mat: None = None# don't really need, but whatever.
+    mat: None = None # don't really need, but whatever.
     mixing: bool = False
     fermion_coupling: str = 'e'
     name: str = 'axion'
     texname: str = r'$\mathrm{Axion}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'scalar2'
+    prefac: np.float64 = 1.
+    se_shape: str = 'scalar'
 
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
-        self.prefac = E_EM**2*1./mfermion
-        self.formfac = np.einsum('a,b -> ab', -1j*self.omega**2, self.S)
+        # self.prefac = E_EM**2
+        Nj = np.array([28, 36])
+        self.prefac = 1.
+        self.S = self.S*np.ones((len(Nj), 3))
+        self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
