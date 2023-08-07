@@ -42,8 +42,7 @@ class ScalarE:
     #                       'cn': 0}
 
     def __post_init__(self):
-        ## FIXME: need Nj for each material. Hardcoded GaAs here.
-        Nj = np.array([28, 36])
+        Nj = self.mat.get_Nj()
         Vel = V0*np.array([0,0,1])
         self.formfac =  Nj[:, np.newaxis, np.newaxis] * self.omega[:,np.newaxis]*Vel 
         if self.mixing:
@@ -255,7 +254,7 @@ class Axion:
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
         # self.prefac = E_EM**2
-        Nj = np.array([28, 36])
+        Nj = self.mat.get_Nj()
         self.prefac = 1.
         self.S = self.S*np.ones((len(Nj), 3))
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)

@@ -96,10 +96,10 @@ class Material:
         ## FIXME: finish.
         composition = pmgCore.Composition(self.name)
         oxi_state_guesses = composition.oxi_state_guesses()
-        self.symbols = re.findall(r'[A-Z][a-z]*', s)
+        self.symbols = re.findall(r'[A-Z][a-z]*', self.name)
         
         N_e_list = []
-        for s,symbol in enumberate(self.symbols):
+        for s,symbol in enumerate(self.symbols):
 
             oxi_number = 0
 
