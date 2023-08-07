@@ -39,7 +39,8 @@ matplotlib.use('Agg')
 u.set_enabled_equivalencies(u.mass_energy())
 
 qs = r.generate_q_mesh(10**(-4), 5, 5)
-mlist = np.logspace(-2,np.log10(0.5),int(1e3));
+# mlist = np.logspace(-2,np.log10(0.5),int(1e3));
+mlist = np.linspace(0.01, 1, int(1e5))
 
 ## load other limits
 rg = pd.read_csv('../data/limit_data/AxionLimits/RedGiants.txt', skiprows=2, delimiter='\s+', names=['mass [eV]', 'g'])
@@ -115,7 +116,7 @@ y_labels = [ r'$g_{aee}$', r'$g_{ann}$', r'$g_{app}$' ]
 [axx.set_yscale('log') for axx in ax]
 [axx.minorticks_on() for axx in ax]
 [axx.set_xlim([10, 1000]) for axx in ax]
-ax[0].set_ylim([1.e-16, 1.e-11])
+ax[0].set_ylim([1.e-16, 1.e-9])
 [axx.set_ylim([1.e-14, 1.e-7]) for axx in ax[1:]]
 
 ## plot our limits
