@@ -90,6 +90,7 @@ class Vector:
 class DarkPhoton:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
+    mat: None
     name: str = 'dark_photon'
     texname: str = r'$\mathrm{Vector~DM}$'
     texop: str = r'$\kappa e \phi_\mu\bar\psi \gamma^\mu\psi$'
@@ -97,29 +98,55 @@ class DarkPhoton:
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 1. # e's cancel from conversion from g to kappa
     se_shape: str = 'vector'
+    ce: np.float64 = 1.
+    cp: np.float64 = -1.
+    cn: np.float64 = 0.
+    mixing: bool = False
 
     def __post_init__(self):
-        self.formfaci0 = self.q_XYZ_list
-        self.formfacij = np.einsum(
-            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+        Ne = self.mat.get_Nj()
+        Np = self.mat.Z_list
+        Nn = self.mat.N_n_list
+        Fe = self.formfacij =  np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
+        Fp = self.formfacij =  np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
+        Fn = self.formfacij =  np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
+        self.formfacij = self.ce * Fe + self.cp * Fp + self.cn * Fn
+
+        Vel = V0*np.array([0,0,1])
+        self.formfaci0 = self.omega[:,np.newaxis]*Vel 
+        
 
 @dataclass
 class BminusL:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
+    mat: None
     name: str = 'bminsl'
     texname: str = r'$\mathrm{U}(1)\mathrm{b}$'
-    #FIXME: not sure if correct op.
     texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{B-L}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = E_EM**2
     se_shape: str = 'vector'
+    ce: np.float64 = 1.
+    cp: np.float64 = 0.
+    cn: np.float64 = 0.
+    mixing: bool = False
 
     def __post_init__(self):
-        self.formfaci0 = self.q_XYZ_list
-        self.formfacij = np.einsum(
-            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+        # self.formfaci0 = self.q_XYZ_list
+        # self.formfacij = np.einsum(
+        #     'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
+        Ne = self.mat.get_Nj()
+        Np = self.mat.Z_list
+        Nn = self.mat.N_n_list
+        Fe = self.formfacij =  np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
+        Fp = self.formfacij =  np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
+        Fn = self.formfacij =  np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
+        self.formfacij = self.ce * Fe + self.cp * Fp + self.cn * Fn
+
+        Vel = V0*np.array([0,0,1])
+        self.formfaci0 = self.omega[:,np.newaxis]*Vel 
 
 
 @dataclass

@@ -61,7 +61,9 @@ class Material:
                                    unitcell_filename=POSCAR_PATH,
                                    force_sets_filename=FORCE_SETS_PATH
                                    )
+        ## get list of protons, neutrons, and symbols
         self.Z_list = phonon_file.primitive.get_atomic_numbers()
+        self.N_n_list = phonon_file.primitive.get_masses() - self.Z_list
         self.symbols = phonon_file.primitive.symbols
 
         [num_atoms,

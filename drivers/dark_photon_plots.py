@@ -46,7 +46,7 @@ al_kappa = pd.read_csv('../data/limit_data/kappa/al2o3_kappa.dat', names=['mv', 
 ff = pd.read_csv('../data/limit_data/AxionLimits/FifthForce_BL.txt', skiprows=3, delimiter='\s+', names=['mass [eV]', 'g_BL'])
 
 # FIXME: move to plotting script
-def plot_coupling(coupling, ax=None, legend=True, mo=False, data=False):
+def plot_darkphot(ax=None, legend=True, mo=False, data=False):
     if ax==None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -58,6 +58,32 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False, data=False):
         if ax==None:
             print(m)
         mat = material.Material(m, qs)
+        coupling = coup.DarkPhoton(q_XYZ_list=qs, omega=mlist, mat=mat)
+        reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+        print(np.min(reach))
+        ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+    if legend:
+        if data:
+            ax.loglog(1,1, ls='dashed', color='black', label=r'$\mathrm{Data}$')
+        ax.legend(fontsize=16, loc='lower right')
+    if ax==None:
+        fig.savefig(f'../results/plots/{coupling.name}.pdf')
+    else:
+        return ax
+# FIXME: move to plotting script
+def plot_BL(ax=None, legend=True, mo=False, data=False):
+    if ax==None:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+    if mo == False:
+        matlist = ['GaAs', 'Al2O3', 'SiO2']
+    else:
+        matlist = ['FeS2']
+    for i, m in enumerate(matlist):
+        if ax==None:
+            print(m)
+        mat = material.Material(m, qs)
+        coupling = coup.BminusL(q_XYZ_list=qs, omega=mlist, mat=mat)
         reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
         print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
@@ -87,8 +113,7 @@ ax.set_xlim([10, 1000])
 ax.set_ylim([1.e-18, 1.e-14])
 
 ## plot our constraints
-co = coup.DarkPhoton(q_XYZ_list=qs, omega=mlist)
-plot_coupling(co, ax=ax, legend=True, data=True)
+plot_darkphot(ax=ax, legend=True, data=True)
 ax.plot((ga_kappa['mv'].to_numpy()*u.eV).value*1000, ga_kappa['kappa'], ls='dashed', c=cs[0])
 ax.plot((al_kappa['mv'].to_numpy()*u.eV).value*1000, al_kappa['kappa'], ls='dashed', c=cs[1])
 ax.plot((si_kappa['mv'].to_numpy()*u.eV).value*1000, si_kappa['kappa'], ls='dashed', c=cs[2])
@@ -112,11 +137,10 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.minorticks_on()
 ax.set_xlim([10, 1000])
-ax.set_ylim([1.e-18, 1.e-12])
+ax.set_ylim([1.e-19, 1.e-13])
 
 ## plot our constraints
-co = coup.BminusL(q_XYZ_list=qs, omega=mlist)
-plot_coupling(co, ax=ax, legend=True)
+plot_BL(ax=ax, legend=True, data=True)
 
 ## plot other limits
 
