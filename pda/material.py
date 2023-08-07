@@ -62,6 +62,7 @@ class Material:
                                    force_sets_filename=FORCE_SETS_PATH
                                    )
         self.Z_list = phonon_file.primitive.get_atomic_numbers()
+        self.symbols = phonon_file.primitive.symbols
 
         [num_atoms,
          num_modes,
@@ -93,10 +94,9 @@ class Material:
 
     def get_Nj(self):
         ## from Tanner
-        ## FIXME: finish.
         composition = pmgCore.Composition(self.name)
         oxi_state_guesses = composition.oxi_state_guesses()
-        self.symbols = re.findall(r'[A-Z][a-z]*', self.name)
+        # self.symbols = re.findall(r'[A-Z][a-z]*', self.name)
         
         N_e_list = []
         for s,symbol in enumerate(self.symbols):

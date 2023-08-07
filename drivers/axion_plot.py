@@ -131,7 +131,7 @@ for j,m in enumerate(matlist):
         else:
             S = np.array([0,0,0.5])
         for i,axx in enumerate(ax):
-                 coupling = coup.Axion(qs, mlist, S, fermions[i])
+                 coupling = coup.Axion(qs, omega=mlist, S=S, fermion_coupling=fermions[i], mat=mat)
                  reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
                 #  reach *= 1./mat.m_cell
                  print(np.min(reach))

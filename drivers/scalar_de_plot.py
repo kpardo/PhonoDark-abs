@@ -44,19 +44,20 @@ rg = pd.read_csv('../data/limit_data/AxionLimits/RedGiants_electron.txt', skipro
 wd = pd.read_csv('../data/limit_data/AxionLimits/WhiteDwarfs_electron.txt', skiprows=3, delimiter='\s+', names=['mass [eV]', 'd_e'])
 
 # FIXME: Also move to plotting script?
-def plot_coupling(coupling, ax=None, legend=True, mo=False):
+def plot_coupling(ax=None, legend=True, mo=False):
     if ax==None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     if mo == False:
-        matlist = ['GaAs', 'Al2O3', 'SiO2', 'FeBr2']
+        matlist = ['GaAs', 'Al2O3', 'SiO2']
     else:
         matlist = ['FeS2']
     for i, m in enumerate(matlist):
         if ax==None:
             print(m)
         mat = material.Material(m, qs)
-        reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+        co = coup.ScalarE(q_XYZ_list=qs, omega=mlist, mat=mat)
+        reach = re.reach(mlist, qs, mat, coupling=co, pol_mixing=True)
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
         print(np.min(reach))
     if legend:
@@ -68,7 +69,6 @@ def plot_coupling(coupling, ax=None, legend=True, mo=False):
 
 f = plt.figure()
 ax = f.add_subplot(1,1,1)
-co = coup.ScalarE(q_XYZ_list=qs)
 ax.plot(ff['mass [eV]']*1000, ff['d_e'], c=cs[5], lw=2)
 ax.plot(rg['mass [eV]']*1000, rg['d_e'], c=cs[4], lw=2)
 ax.plot(wd['mass [eV]']*1000, wd['d_e'], c=cs[7], lw=2)
@@ -77,7 +77,7 @@ ax.fill_between(ff['mass [eV]']*1000, ff['d_e'], 1.e30*np.ones(len(ff)), alpha=0
 ax.fill_between(rg['mass [eV]']*1000, rg['d_e'], 1.e30*np.ones(len(rg)), alpha=0.3, color=cs[4])
 ax.fill_between(wd['mass [eV]']*1000, wd['d_e'], 1.e30*np.ones(len(wd)), alpha=0.3, color=cs[7])
 
-plot_coupling(co, ax=ax, legend=True)
+plot_coupling(ax=ax, legend=True)
 plt.yscale('log')
 plt.xscale('log')
 plt.ylim([1.e4, 1.e11])
