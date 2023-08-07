@@ -192,7 +192,6 @@ class ElectricDipole:
             Fe = (np.einsum('w, kc, jc, ab -> jwabk', 
                                     2.*1j*self.omega*V0, 
                                     self.q_XYZ_list, self.S, np.identity(3)))
-            print(np.shape(Fe))
             self.formfacij = self.ce * Fe
             ##FIXME: add cn and cp terms.
             # self.formfaci0 = 4j*self.q_XYZ_list*np.einsum('ia,a -> ia', self.q_XYZ_list,self.S)
@@ -215,6 +214,7 @@ class ElectricDipole:
 class MagneticDipole:
     q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
+    mat: None
     S: np.ndarray = np.zeros((1))  # magnetic spin vector
     mo: bool = False ## magnetic ordering
     name: str = 'magneticdipole'
@@ -224,19 +224,32 @@ class MagneticDipole:
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 1. / E_EM**2
     se_shape: str = 'dim5'
+    ce: np.float64 = 1.
+    cp: np.float64 = 0.
+    cn: np.float64 = 0.
+    mixing: bool = False
+
 
     def __post_init__(self):
         if self.mo:
             self.se_shape = 'dim52'
-            self.formfaci0 = -2j* np.einsum('j, abc, ib, a -> jic', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
-            self.formfacij = -2j * \
-                np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
-        elif ~self.mo:
+            Nj = self.mat.get_Nj()
+            self.S = self.S*np.ones((len(Nj), 3))
+            Fe = (np.einsum('w, jb, bai -> jwabi',
+                            2.*1j*self.omega**2,
+                            self.S, self.levicivita()))
+            print(np.shape(Fe))
+            self.formfacij = self.ce * Fe
+        #     self.se_shape = 'dim52'
+        #     self.formfaci0 = -2j* np.einsum('j, abc, ib, a -> jic', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
+        #     self.formfacij = -2j * \
+        #         np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
+        # elif ~self.mo:
             ## don't actually check this for non-screened.
-            self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
-            formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
-            formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
-            self.formfacij = formfacij1 + formfacij2
+            # self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
+            # formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
+            # formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
+            # self.formfacij = formfacij1 + formfacij2
 
     def levicivita(self):
         ## stack exchange, probably.

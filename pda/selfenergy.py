@@ -139,15 +139,20 @@ class SelfEnergy:
             # se1[:, :, :, 1:] = sei
 
         elif self.coupling.se_shape == 'dim52':
+            print(np.shape(totse), np.shape(self.coupling.formfacij))
+            se1 = np.einsum('jmkw, jwabi, mwabi -> kw', 
+                         totse, 
+                         self.coupling.formfacij, 
+                         np.conj(self.coupling.formfacij))
             ## omega and q are in first term, w is in second
-            se0 = np.einsum('ikabj, jia, jib -> ikj', totse,
-                            self.coupling.formfaci0, self.coupling.formfaci0)
-            sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
-                            self.coupling.formfacij, self.coupling.formfacij)
-            se1 = np.zeros(
-                (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
-            se1[:, :, :, 0] = se0
-            se1[:, :, :, 1:] = sei
+            # se0 = np.einsum('ikabj, jia, jib -> ikj', totse,
+            #                 self.coupling.formfaci0, self.coupling.formfaci0)
+            # sei = np.einsum('ikabj, jan, jbn -> ikjn', totse,
+            #                 self.coupling.formfacij, self.coupling.formfacij)
+            # se1 = np.zeros(
+            #     (len(self.k), len(self.mat.energies[0]), len(self.nu), 4), dtype=complex)
+            # se1[:, :, :, 0] = se0
+            # se1[:, :, :, 1:] = sei
 
         if self.mixing:
             se = self.mixing_contribution(se1)
