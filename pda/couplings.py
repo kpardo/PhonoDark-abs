@@ -39,31 +39,24 @@ class ScalarE:
     mixing: bool = False
     ce: np.float64 = 1.
     cp: np.float64 = 0.
-    # coupling_cns: dict = {'ce': 1,
-    #                       'cp': 0,
-    #                       'cn': 0}
+    cn: np.float64 = 0.
 
     def __post_init__(self):
-        print('getting Nj and qmag and qhat')
         Nj = self.mat.get_Nj()
         Np = self.mat.Z_list
+        Nn = Nn = self.mat.N_n_list
         qmag = self.omega*V0
         qhat = 1./np.linalg.norm(self.q_XYZ_list, axis=1)[:, np.newaxis]*self.q_XYZ_list
-        print(qhat[0])
-        print('getting formfac')
         Fe =  np.einsum('j, w, ki -> jwki', Nj, qmag, qhat)
         Fp =  np.einsum('j, w, ki -> jwki', Np, qmag, qhat)
-        self.formfac = self.ce * Fe + self.cp * Fp
-        print('got formfac')
+        Fn =  np.einsum('j, w, ki -> jwki', Nn, qmag, qhat)
+        self.formfac = self.ce * Fe + self.cp * Fp + self.cn * Fn
         if self.mixing:
             epsfactor = (1- 1./3.*np.trace(self.mat.dielectric))
-            print(epsfactor)
-            print('got epsfactor')
             self.mixing_A_e = self.ce * epsfactor * E_EM**(-1) * ( 
                     np.einsum('w, ki -> wki', 
                             qmag*self.omega,
                             qhat))
-            print('got mix A_e')
 
 
 @dataclass
