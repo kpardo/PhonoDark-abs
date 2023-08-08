@@ -133,12 +133,31 @@ class ElectricDipole:
             Fe = (np.einsum('w, kc, jc, ab -> jwabk', 
                                     2.*1j*self.omega**2*V0, 
                                     qhat, self.S, np.identity(3)))
-            self.formfac = self.ce * Fe
             ##FIXME: add cn and cp terms.
+            self.formfac = self.ce * Fe
+            
         elif ~self.mo:
-            ##FIXME: should just return 0s
-            self.formfaci0 = np.zeros(np.shape(self.q_XYZ_list))
-            self.formfacij = np.einsum('j, abc, ic -> jiab', -1.*self.omega, self.levicivita(), self.q_XYZ_list)
+            qhat = 1./np.linalg.norm(self.q_XYZ_list,
+                                     axis=1)[:, np.newaxis]*self.q_XYZ_list
+            Nj = self.mat.get_Nj()
+            self.formfac = np.zeros((len(Nj), len(self.omega), 3, 3, len(qhat)))
+        
+        if self.mixing:
+            eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+            qhat = 1./np.linalg.norm(self.q_XYZ_list,
+                                     axis=1)[:, np.newaxis]*self.q_XYZ_list
+            Nj = self.mat.get_Nj()
+            self.S = self.S*np.ones((len(Nj), 3))
+            s_hat_e = np.einsum('ji-> i', self.S)
+            ## normalize s_hat_e
+            if np.linalg.norm(s_hat_e) > 1:
+                s_hat_e = s_hat_e / np.linalg.norm(s_hat_e)
+            self.mixing_A_e = self.ce * (-2*1j*(E_EM)**(-1)) * ( 
+                        np.einsum('w, km, m, ab -> wkab', 
+                                  self.omega**3*V0, 
+                                  qhat, 
+                                  s_hat_e, 
+                                  np.identity(3)) * ( 1.0 - eps_infty ) )
 
     def levicivita(self):
         eijk = np.zeros((3, 3, 3))

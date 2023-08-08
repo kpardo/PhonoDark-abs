@@ -123,6 +123,21 @@ class SelfEnergy:
             pi_mix_sq = np.einsum('wkac, wkca -> wk', pi_phi_a, pi_a_phi)
 
 
+        elif self.coupling.se_shape == 'dim5':
+            pi_phi_a_ph = np.einsum('jmkw, jwabk, wmcb -> wkac', 
+                                self.totse, 
+                                self.coupling.formfac, 
+                                np.conj(self.formfacAA))
+            pi_a_phi_ph = np.einsum('jmkw, wjab, mwcbk -> wkac', 
+                                self.totse, 
+                                self.formfacAA,
+                                np.conj(self.coupling.formfac))
+            pi_phi_a = pi_phi_a_ph + self.coupling.mixing_A_e
+            pi_a_phi = pi_a_phi_ph - self.coupling.mixing_A_e
+            pi_mix_sq = np.einsum('wkac, wkca -> wk', pi_phi_a, pi_a_phi)
+
+
+
         fullmix =  pi_mix_sq / ((self.nu**2)[:, np.newaxis] - piaa)
 
         finalse = se + fullmix.T
