@@ -191,17 +191,32 @@ class MagneticDipole:
             self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
-            Fe = (np.einsum('w, jb, bai -> jwabi',
+            Fe = (np.einsum('w, jb, bai -> jwai',
                             2.*1j*self.omega**2,
                             self.S, self.levicivita()))
             self.formfac = self.ce * Fe
+            if self.mixing:
+                eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+                Nj = self.mat.get_Nj()
+                self.S = self.S*np.ones((len(Nj), 3))
+                s_hat_e = np.einsum('ji-> i', self.S)
+                self.mixing_A_e = self.ce* (-2*1j*(E_EM)**(-1)) * ( 
+                        np.einsum('w, m, ikm -> wik', self.omega**3, s_hat_e, self.levicivita()) * ( 1.0 - eps_infty ) )
         else:
             self.se_shape = 'vector'
             Nj = self.mat.get_Nj()
             Fe = (np.einsum('w, j, ab -> jwab',
                             self.omega**3/(2.*M_ELEC),
                             Nj, np.eye(3,3)))
-            self.formfacij = self.ce * Fe
+            self.formfac = self.ce * Fe
+            if self.mixing:
+                eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+                piaa_e = self.omega**2 * ( 1.0 - eps_infty )
+                self.mixing_A_e = self.ce * E_EM**(-1) * np.einsum('w, w, ab -> wab',
+                                                                 self.omega**2 / (2*M_ELEC),
+                                                                  piaa_e,
+                                                                  np.identity(3))
+        
 
     def levicivita(self):
         ## stack exchange, probably.
