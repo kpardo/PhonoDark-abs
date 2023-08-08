@@ -6,22 +6,6 @@ from dataclasses import dataclass
 import numpy as np
 from pda.constants import *
 
-
-@dataclass
-class Scalar:
-    q_XYZ_list: np.ndarray
-    name: str = 'scalar'
-    texname: str = r'$\mathrm{Scalar}$'
-    texop: str = r'$g_\chi \phi \bar{\psi} \psi$'
-    texcoupconst: str = r'$g_{\chi}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2
-    se_shape: str = 'scalar'
-
-    def __post_init__(self):
-        self.formfac = self.q_XYZ_list
-
-
 @dataclass
 class ScalarE:
     q_XYZ_list: np.ndarray
@@ -32,8 +16,8 @@ class ScalarE:
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    # prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
-    prefac: np.float64 = 1.
+    prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
+    # prefac: np.float64 = 1.
     se_shape: str = 'scalar'
     mixing_phia: np.ndarray = np.zeros((1))
     mixing: bool = False
@@ -58,41 +42,6 @@ class ScalarE:
                             qmag*self.omega,
                             qhat))
 
-
-@dataclass
-class Pseudoscalar:
-    q_XYZ_list: np.ndarray
-    name: str = 'pseudoscalar'
-    texname: str = r'$\mathrm{Pseudoscalar}$'
-    texop: str = r'$g_\chi \phi\bar\psi i\gamma_5\psi$'
-    texcoupconst: str = r'$g_{\chi}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'scalar'
-
-    def __post_init__(self):
-        # raise Warning('Not implemented fully!')
-        print('Not implemented fully!')
-
-
-@dataclass
-class Vector:
-    q_XYZ_list: np.ndarray
-    omega: np.ndarray  # e.g., DM masses
-    name: str = 'vector'
-    texname: str = r'$\mathrm{Vector}$'
-    texop: str = r'$g_\chi \phi_\mu\bar\psi \gamma^\mu\psi$'
-    texcoupconst: str = r'$g_{\chi}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2
-    se_shape: str = 'vector'
-
-    def __post_init__(self):
-        self.formfaci0 = self.q_XYZ_list
-        self.formfacij = np.einsum(
-            'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
-
-
 @dataclass
 class DarkPhoton:
     q_XYZ_list: np.ndarray
@@ -114,14 +63,10 @@ class DarkPhoton:
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
-        Fe = self.formfacij =  np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
-        Fp = self.formfacij =  np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
-        Fn = self.formfacij =  np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
-        self.formfacij = self.ce * Fe + self.cp * Fp + self.cn * Fn
-
-        Vel = V0*np.array([0,0,1])
-        self.formfaci0 = self.omega[:,np.newaxis]*Vel 
-        
+        Fe = np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
+        Fp = np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
+        Fn = np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
+        self.formfac = self.ce * Fe + self.cp * Fp + self.cn * Fn
 
 @dataclass
 class BminusL:
@@ -141,36 +86,13 @@ class BminusL:
     mixing: bool = False
 
     def __post_init__(self):
-        # self.formfaci0 = self.q_XYZ_list
-        # self.formfacij = np.einsum(
-        #     'j, ab -> jab', -1.*self.omega, np.eye(3, 3))
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
-        Fe = self.formfacij =  np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
-        Fp = self.formfacij =  np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
-        Fn = self.formfacij =  np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
-        self.formfacij = self.ce * Fe + self.cp * Fp + self.cn * Fn
-
-        Vel = V0*np.array([0,0,1])
-        self.formfaci0 = self.omega[:,np.newaxis]*Vel 
-
-
-@dataclass
-class AxialVector:
-    q_XYZ_list: np.ndarray
-    name: str = 'axialvector'
-    texname: str = r'$\mathrm{Axial~Vector}$'
-    texop: str = r'$g_\chi \phi_\mu\bar\psi\gamma^\mu\gamma^5\psi$'
-    texcoupconst: str = r'$g_{\chi}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'vector'
-
-    def __post_init__(self):
-        # raise Warning('Not implemented fully!')
-        print('Not implemented fully!')
-
+        Fe = np.einsum('j, w, ab -> jwab', Ne, self.omega, np.identity(3))
+        Fp = np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
+        Fn = np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
+        self.formfac = self.ce * Fe + self.cp * Fp + self.cn * Fn
 
 @dataclass
 class ElectricDipole:
@@ -201,12 +123,8 @@ class ElectricDipole:
             Fe = (np.einsum('w, kc, jc, ab -> jwabk', 
                                     2.*1j*self.omega**2*V0, 
                                     qhat, self.S, np.identity(3)))
-            self.formfacij = self.ce * Fe
+            self.formfac = self.ce * Fe
             ##FIXME: add cn and cp terms.
-            # self.formfaci0 = 4j*self.q_XYZ_list*np.einsum('ia,a -> ia', self.q_XYZ_list,self.S)
-            # formfacij1 = -8j*np.einsum('j, ia, b -> jiab', self.omega, self.q_XYZ_list, self.S)
-            # formfacij2 = 4j*np.einsum('j, ia, a, bc -> jibc', self.omega, self.q_XYZ_list, self.S, np.eye(3,3))
-            # self.formfacij = formfacij1 + formfacij2
         elif ~self.mo:
             ##FIXME: should just return 0s
             self.formfaci0 = np.zeros(np.shape(self.q_XYZ_list))
@@ -241,17 +159,13 @@ class MagneticDipole:
 
     def __post_init__(self):
         if self.mo:
-            self.se_shape = 'dim52'
+            self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
             Fe = (np.einsum('w, jb, bai -> jwabi',
                             2.*1j*self.omega**2,
                             self.S, self.levicivita()))
-            self.formfacij = self.ce * Fe
-        #     self.se_shape = 'dim52'
-        #     self.formfaci0 = -2j* np.einsum('j, abc, ib, a -> jic', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
-        #     self.formfacij = -2j * \
-        #         np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
+            self.formfac = self.ce * Fe
         else:
             self.se_shape = 'vector'
             Nj = self.mat.get_Nj()
@@ -259,11 +173,6 @@ class MagneticDipole:
                             self.omega**3/(2.*M_ELEC),
                             Nj, np.eye(3,3)))
             self.formfacij = self.ce * Fe
-            # don't actually check this for non-screened.
-            # self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
-            # formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
-            # formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
-            # self.formfacij = formfacij1 + formfacij2
 
     def levicivita(self):
         ## stack exchange, probably.
@@ -271,40 +180,6 @@ class MagneticDipole:
         eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
         eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
         return eijk
-
-@dataclass
-class Anapole:
-    q_XYZ_list: np.ndarray
-    name: str = 'anapole'
-    texname: str = r'$\mathrm{Anapole}$'
-    texop: str = r'$\frac{g_\chi}{4m_\psi^2}\left(\partial^\nu \phi_{\mu\nu}\right)\left(\bar\psi\gamma^\mu\gamma^5\psi\right)$'
-    texcoupconst: str = r'$g_{\chi}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'scalar'
-
-    def __post_init__(self):
-        # raise Warning('Not implemented fully!')
-        print('Not implemented fully!')
-
-
-@dataclass
-class Axion_ExternalB:
-    q_XYZ_list: np.ndarray
-    # 10 Tesla averaged over 3 directions.
-    # FIXME: implement more general b field config.
-    bfield: np.ndarray = 10**2 * T_To_eV2**2 * 1/3
-    name: str = 'axion'
-    texname: str = r'$\mathrm{Axion}$'
-    texop: str = r'$g_{a\gamma\gamma} a F_{\mu\nu}F^{\mu\nu}$'
-    texcoupconst: str = r'$g_{a\gamma\gamma}$'
-    formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 0.
-    se_shape: str = 'scalar'
-
-    def __post_init__(self):
-        self.prefac = E_EM**2 * self.bfield
-        self.formfac = np.ones((np.shape(self.q_XYZ_list)))
 
 @dataclass
 class Axion:
@@ -322,9 +197,6 @@ class Axion:
 
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
-        # self.prefac = E_EM**2
-        # Nj = self.mat.get_Nj()
-        # self.S = self.S*np.ones((len(Nj), 3))
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 
     def get_coupconst(self):

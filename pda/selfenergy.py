@@ -67,20 +67,20 @@ class SelfEnergy:
         elif self.coupling.se_shape == 'vector':
             se1 = np.einsum('jmkw, jwab, mwab -> kw', 
                          totse, 
-                         self.coupling.formfacij, 
-                         np.conj(self.coupling.formfacij))
+                         self.coupling.formfac, 
+                         np.conj(self.coupling.formfac))
 
         elif self.coupling.se_shape == 'dim5':
             se1 = np.einsum('jmkw, jwabk, mwabk -> kw', 
                          totse, 
-                         self.coupling.formfacij, 
-                         np.conj(self.coupling.formfacij))
+                         self.coupling.formfac, 
+                         np.conj(self.coupling.formfac))
 
         elif self.coupling.se_shape == 'dim5_s':
             se1 = np.einsum('jmkw, jwabi, mwabi -> kw', 
                          totse, 
-                         self.coupling.formfacij, 
-                         np.conj(self.coupling.formfacij))
+                         self.coupling.formfac, 
+                         np.conj(self.coupling.formfac))
 
         if self.mixing:
             se = self.mixing_contribution(se1)
