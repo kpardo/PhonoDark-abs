@@ -65,19 +65,19 @@ class SelfEnergy:
 
         elif self.coupling.se_shape == 'vector':
             se1 = np.einsum('jmkw, jwab, mwab -> kw', 
-                         totse, 
+                         self.totse, 
                          self.coupling.formfac, 
                          np.conj(self.coupling.formfac))
 
         elif self.coupling.se_shape == 'dim5':
             se1 = np.einsum('jmkw, jwabk, mwabk -> kw', 
-                         totse, 
+                         self.totse, 
                          self.coupling.formfac, 
                          np.conj(self.coupling.formfac))
 
         elif self.coupling.se_shape == 'dim5_s':
             se1 = np.einsum('jmkw, jwabi, mwabi -> kw', 
-                         totse, 
+                         self.totse, 
                          self.coupling.formfac, 
                          np.conj(self.coupling.formfac))
 
@@ -96,16 +96,33 @@ class SelfEnergy:
         returns full SE, rather than just imaginary part. rate code takes imaginary part.
         '''
         piaa = self.get_photon_se()
-        pi_phi_a_ph = np.einsum('jmkw, jwka, wmba -> wkb', 
-                            self.totse, 
-                            self.coupling.formfac, 
-                            np.conj(self.formfacAA))
-        pi_phi_ph_a = np.einsum('jmkw, wjab, mwkb -> wka', 
-                            self.totse, 
-                            self.formfacAA,
-                            np.conj(self.coupling.formfac))
-        pi_mix_sq = np.einsum('wkb, wkb -> wk', pi_phi_a_ph + self.coupling.mixing_A_e,
-                             pi_phi_ph_a + self.coupling.mixing_A_e)
+
+        if self.coupling.se_shape == 'scalar':
+            pi_phi_a_ph = np.einsum('jmkw, jwka, wmba -> wkb', 
+                                self.totse, 
+                                self.coupling.formfac, 
+                                np.conj(self.formfacAA))
+            pi_a_phi_ph = np.einsum('jmkw, wjab, mwkb -> wka', 
+                                self.totse, 
+                                self.formfacAA,
+                                np.conj(self.coupling.formfac))
+            pi_mix_sq = np.einsum('wkb, wkb -> wk', pi_phi_a_ph + self.coupling.mixing_A_e,
+                                pi_a_phi_ph + self.coupling.mixing_A_e)
+
+        elif self.coupling.se_shape == 'vector':
+            pi_phi_a_ph = np.einsum('jmkw, jwab, wmcb -> wkac', 
+                                self.totse, 
+                                self.coupling.formfac, 
+                                np.conj(self.formfacAA))
+            pi_a_phi_ph = np.einsum('jmkw, wjab, mwcb -> wkac', 
+                                self.totse, 
+                                self.formfacAA,
+                                np.conj(self.coupling.formfac))
+            pi_phi_a = pi_phi_a_ph + self.coupling.mixing_A_e[:,np.newaxis,:,:]
+            pi_a_phi = pi_a_phi_ph + self.coupling.mixing_A_e[:,np.newaxis,:,:]
+            pi_mix_sq = np.einsum('wkac, wkca -> wk', pi_phi_a, pi_a_phi)
+
+
         fullmix =  pi_mix_sq / ((self.nu**2)[:, np.newaxis] - piaa)
 
         finalse = se + fullmix.T
@@ -131,3 +148,4 @@ class SelfEnergy:
         piaa = piaa_e[:, np.newaxis] + piaa_ph
 
         return piaa
+

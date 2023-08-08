@@ -67,6 +67,11 @@ class DarkPhoton:
         Fp = np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
         Fn = np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
         self.formfac = self.ce * Fe + self.cp * Fp + self.cn * Fn
+        if self.mixing:
+            eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+            piaa_e = self.omega**2 * ( 1.0 - eps_infty )
+            self.mixing_A_e =  E_EM**(-1) * \
+                np.einsum('w, ab -> wab', piaa_e, np.identity(3))
 
 @dataclass
 class BminusL:
@@ -93,6 +98,11 @@ class BminusL:
         Fp = np.einsum('j, w, ab -> jwab', Np, self.omega, np.identity(3))
         Fn = np.einsum('j, w, ab -> jwab', Nn, self.omega, np.identity(3))
         self.formfac = self.ce * Fe + self.cp * Fp + self.cn * Fn
+        if self.mixing:
+            eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+            piaa_e = self.omega**2 * ( 1.0 - eps_infty )
+            self.mixing_A_e =  E_EM**(-1) * \
+                np.einsum('w, ab -> wab', piaa_e, np.identity(3))
 
 @dataclass
 class ElectricDipole:
