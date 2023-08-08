@@ -8,7 +8,6 @@ import astropy.units as u
 import sys
 from pda.constants import *
 from pda.material import Material
-import pda.transfer_matrix as tm
 import pda.selfenergy as se
 import pda.rate as r
 import pda.couplings as coup

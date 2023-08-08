@@ -9,7 +9,6 @@ import phonopy
 from pda.constants import *
 import pda.phonopy_funcs as phonopy_funcs
 import pda.new_physics as physics
-import pda.my_math as my_math
 import pda.uvmatrix as uv
 from pda import __path__
 
