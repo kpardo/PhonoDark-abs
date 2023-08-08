@@ -20,13 +20,16 @@ class SelfEnergy:
     lam: str
     pol_mixing: bool = True
     width: str = 'best'
-    width_val: float = 10**(-3)
-    mixing: bool = False
+    width_val: float = 10**(-2)
 
     def __post_init__(self):
         if self.coupling == None:
             # set default coupling if none given as input
             self.coupling = coup.Scalar(q_XYZ_list=self.k)
+        if self.coupling.mixing:
+            self.mixing = True
+        else:
+            self.mixing = False
         self.mat_sq = self.get_mat_sq()
         self.prop = self.get_propagator()
         self.se = self.get_se()
@@ -44,7 +47,7 @@ class SelfEnergy:
         # sum over nu and nu' --> left with q, lambda, a, b
         # matsq = np.einsum('ijklb, ijkla -> ikab', left, right)
         matsq = 1./3. * np.einsum('jnka, mnka -> jmnk', T, Tstar)
-        return matsq
+        return matsq / self.mat.unit_cell_volume
 
     def L_func(self, omega, omega_0, width):
         '''
@@ -78,7 +81,7 @@ class SelfEnergy:
         elif self.width == 'best':
             energies = self.mat.bare_ph_energy_o[0]
             widths = self.width_val*energies
-            prop = (-1.*energies[:, np.newaxis]**2 + self.nu **
+            prop = 1j*(-1.*energies[:, np.newaxis]**2 + self.nu **
                      2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
         else:
             raise NotImplementedError
@@ -88,12 +91,13 @@ class SelfEnergy:
     def get_se(self):
         # tensor product with propagator
         # final matrix has indices q, lambda, a, b, omega=mass_DM
-        totse = np.einsum('jmnk, nw -> jmkw',
+        self.totse = -1j*np.einsum('jmnk, nw -> jmkw',
                           self.coupling.prefac*self.mat_sq, self.prop)
         # dot in relevant vector, given coupling type
         if self.coupling.se_shape == 'scalar':
-            se1 = np.einsum('jmkw, jwa, mwa -> kw', totse,
+            se1 = np.einsum('jmkw, jwka, mwka -> kw', self.totse,
                            self.coupling.formfac, np.conj(self.coupling.formfac))
+            # print('got pi_phiphi')
         # elif self.coupling.se_shape == 'scalar2':
         #     se1 = np.einsum('jmkw, wa, wb -> kw', totse,
         #                    self.coupling.formfac, self.coupling.formfac)
@@ -123,7 +127,6 @@ class SelfEnergy:
         #     se1[:, :, :, 1:] = sei
 
         elif self.coupling.se_shape == 'dim5':
-            print(np.shape(totse), np.shape(self.coupling.formfacij))
             se1 = np.einsum('jmkw, jwabk, mwabk -> kw', 
                          totse, 
                          self.coupling.formfacij, 
@@ -139,7 +142,6 @@ class SelfEnergy:
             # se1[:, :, :, 1:] = sei
 
         elif self.coupling.se_shape == 'dim52':
-            print(np.shape(totse), np.shape(self.coupling.formfacij))
             se1 = np.einsum('jmkw, jwabi, mwabi -> kw', 
                          totse, 
                          self.coupling.formfacij, 
@@ -155,6 +157,7 @@ class SelfEnergy:
             # se1[:, :, :, 1:] = sei
 
         if self.mixing:
+            print('turning on mixing')
             se = self.mixing_contribution(se1)
         else:
             se = se1
@@ -169,19 +172,39 @@ class SelfEnergy:
         returns full SE, rather than just imaginary part. rate code takes imaginary part.
         '''
         # FIXME probably...this is a dummy version before we have full mixing matrices
-        mixing_se = np.zeros((3,3, len(self.nu))) ## probably need to grab from coupling??
         piaa = self.get_photon_se()
-        mixingdot = np.einsum('ijk, ijk -> ijk', mixing_se, mixing_se)
-        fullmix =  mixingdot / (self.nu**2 - piaa)
-        sums = np.einsum('ijk -> k', fullmix)
-        final_se = se + sums
-        print(final_se - se)
-        return final_se
+        pi_phi_a_ph = np.einsum('jmkw, jwka, wmba -> wkb', 
+                            self.totse, 
+                            self.coupling.formfac, 
+                            np.conj(self.formfacAA))
+        pi_phi_ph_a = np.einsum('jmkw, wjab, mwkb -> wka', 
+                            self.totse, 
+                            self.formfacAA,
+                            np.conj(self.coupling.formfac))
+        pi_mix_sq = np.einsum('wkb, wkb -> wk', pi_phi_a_ph + self.coupling.mixing_A_e,
+                             pi_phi_ph_a + self.coupling.mixing_A_e)
+        fullmix =  pi_mix_sq / ((self.nu**2)[:, np.newaxis] - piaa)
+
+        finalse = se + fullmix.T
+        
+        return finalse
 
     def get_photon_se(self):
         '''
         \Pi_AA given by Eqn. 32 in the draft. But we can also just grab it from our dielectric code.
         '''
-        piaa = d.Dielectric(mat=self.mat, mass=self.nu,
-                width_type=self.width, width_val=self.width_val).piaa
+        piaa_e = self.nu**2 * (1. - 1./3.*np.trace(self.mat.dielectric))
+        charge_list = self.mat.Z_list - self.mat.get_Nj()
+        
+        self.formfacAA =  -E_EM*np.einsum('w, j, ab -> wjab', 
+                                self.nu, 
+                                charge_list, 
+                                np.identity(3))
+        piaa_ph = (1/3.0)*np.einsum('jmkw, wjab, wmab -> wk', 
+                         self.totse, 
+                         self.formfacAA, 
+                         np.conj(self.formfacAA))
+
+        
+        piaa = piaa_e[:, np.newaxis] + piaa_ph
         return piaa

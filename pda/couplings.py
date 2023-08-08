@@ -32,24 +32,38 @@ class ScalarE:
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
-    # prefac: np.float64 = 1.
+    # prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
+    prefac: np.float64 = 1.
     se_shape: str = 'scalar'
     mixing_phia: np.ndarray = np.zeros((1))
     mixing: bool = False
+    ce: np.float64 = 1.
+    cp: np.float64 = 0.
     # coupling_cns: dict = {'ce': 1,
     #                       'cp': 0,
     #                       'cn': 0}
 
     def __post_init__(self):
+        print('getting Nj and qmag and qhat')
         Nj = self.mat.get_Nj()
-        Vel = V0*np.array([0,0,1])
-        self.formfac =  Nj[:, np.newaxis, np.newaxis] * self.omega[:,np.newaxis]*Vel 
+        Np = self.mat.Z_list
+        qmag = self.omega*V0
+        qhat = 1./np.linalg.norm(self.q_XYZ_list, axis=1)[:, np.newaxis]*self.q_XYZ_list
+        print(qhat[0])
+        print('getting formfac')
+        Fe =  np.einsum('j, w, ki -> jwki', Nj, qmag, qhat)
+        Fp =  np.einsum('j, w, ki -> jwki', Np, qmag, qhat)
+        self.formfac = self.ce * Fe + self.cp * Fp
+        print('got formfac')
         if self.mixing:
-            self.mixing_phia_prefac = 1j*E_EM*self.omega
-            self.mixing_phia_F1 = self.q_XYZ_list
-            self.mixing_phia_F2 = 1.
-            self.mixing_term2 = 1./E_EM * np.outer(self.omega, self.q_XYZ_list) * (1 - np.trace(self.mat.dielectric))
+            epsfactor = (1- 1./3.*np.trace(self.mat.dielectric))
+            print(epsfactor)
+            print('got epsfactor')
+            self.mixing_A_e = self.ce * epsfactor * E_EM**(-1) * ( 
+                    np.einsum('w, ki -> wki', 
+                            qmag*self.omega,
+                            qhat))
+            print('got mix A_e')
 
 
 @dataclass
@@ -126,7 +140,7 @@ class BminusL:
     texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$g_{B-L}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = E_EM**2
+    prefac: np.float64 = 1.
     se_shape: str = 'vector'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
@@ -177,7 +191,7 @@ class ElectricDipole:
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}i\gamma^5\psi$'
     texcoupconst: str = r'$d_{E}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1./3.
+    prefac: np.float64 = 1.
     se_shape: str = 'dim5'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
@@ -189,9 +203,11 @@ class ElectricDipole:
         if self.mo:
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
+            qhat = 1./np.linalg.norm(self.q_XYZ_list, axis=1)[:, np.newaxis]*self.q_XYZ_list
+            
             Fe = (np.einsum('w, kc, jc, ab -> jwabk', 
-                                    2.*1j*self.omega*V0, 
-                                    self.q_XYZ_list, self.S, np.identity(3)))
+                                    2.*1j*self.omega**2*V0, 
+                                    qhat, self.S, np.identity(3)))
             self.formfacij = self.ce * Fe
             ##FIXME: add cn and cp terms.
             # self.formfaci0 = 4j*self.q_XYZ_list*np.einsum('ia,a -> ia', self.q_XYZ_list,self.S)
@@ -222,13 +238,13 @@ class MagneticDipole:
     texop: str = r'$\frac{g_\chi}{4m_\psi}\phi_{\mu\nu}\bar\psi\sigma^{\mu\nu}\psi$'
     texcoupconst: str = r'$d_{M}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1. / E_EM**2
+    # prefac: np.float64 = 1. / E_EM**2
+    prefac: np.float64 = 1.
     se_shape: str = 'dim5'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
     cn: np.float64 = 0.
     mixing: bool = False
-
 
     def __post_init__(self):
         if self.mo:
@@ -238,14 +254,19 @@ class MagneticDipole:
             Fe = (np.einsum('w, jb, bai -> jwabi',
                             2.*1j*self.omega**2,
                             self.S, self.levicivita()))
-            print(np.shape(Fe))
             self.formfacij = self.ce * Fe
         #     self.se_shape = 'dim52'
         #     self.formfaci0 = -2j* np.einsum('j, abc, ib, a -> jic', self.omega, self.levicivita(), self.q_XYZ_list, self.S)
         #     self.formfacij = -2j * \
         #         np.einsum('j, abc, a -> jbc', self.omega**2, self.levicivita(), self.S)
-        # elif ~self.mo:
-            ## don't actually check this for non-screened.
+        else:
+            self.se_shape = 'vector'
+            Nj = self.mat.get_Nj()
+            Fe = (np.einsum('w, j, ab -> jwab',
+                            self.omega**3/(2.*M_ELEC),
+                            Nj, np.eye(3,3)))
+            self.formfacij = self.ce * Fe
+            # don't actually check this for non-screened.
             # self.formfaci0 = (np.linalg.norm(self.q_XYZ_list, axis=1)[:,np.newaxis])**2 * self.q_XYZ_list
             # formfacij1 = np.einsum('j, ia, ib -> jiab', self.omega, self.q_XYZ_list, self.q_XYZ_list)
             # formfacij2 = np.einsum('j, i, ab -> jiab', -1.*self.omega, (np.linalg.norm(self.q_XYZ_list, axis=1))**2, np.eye(3,3))
@@ -309,17 +330,24 @@ class Axion:
     def __post_init__(self):
         self.texcoupconst, mfermion = self.get_coupconst()
         # self.prefac = E_EM**2
-        Nj = self.mat.get_Nj()
-        self.prefac = 1.
-        self.S = self.S*np.ones((len(Nj), 3))
+        # Nj = self.mat.get_Nj()
+        # self.S = self.S*np.ones((len(Nj), 3))
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
+            Nj = self.mat.get_Nj()
+            self.S = self.S*np.ones((len(Nj), 3))
             return r'$g_{aee}$', M_ELEC
         elif self.fermion_coupling == 'n':
+            Nn = self.mat.N_n_list
+            self.S = self.S*np.ones((len(Nn), 3))
+            self.S = Nn[:, np.newaxis]*self.S
             return r'$g_{ann}$', M_NEUTRON
         elif self.fermion_coupling == 'p':
+            Np = self.mat.Z_list
+            self.S = self.S*np.ones((len(Np), 3))
+            self.S = Np[:, np.newaxis]*self.S
             return r'$g_{app}$', M_PROTON
         else:
             raise Warning('Not a valid fermion type!')

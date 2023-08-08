@@ -65,6 +65,8 @@ class Material:
         self.Z_list = phonon_file.primitive.get_atomic_numbers()
         self.N_n_list = phonon_file.primitive.get_masses() - self.Z_list
         self.symbols = phonon_file.primitive.symbols
+        
+        
 
         [num_atoms,
          num_modes,
@@ -78,8 +80,14 @@ class Material:
          dielectric,
          V_PC] = phonopy_funcs.get_phonon_file_data(phonon_file, self.name)
 
+        self.lat_vec = np.zeros((3, 3))
+        self.lat_vec[0] = pos_red_to_XYZ[:, 0]
+        self.lat_vec[1] = pos_red_to_XYZ[:, 1]
+        self.lat_vec[2] = pos_red_to_XYZ[:, 2]
+        self.unit_cell_volume = np.linalg.det(self.lat_vec)
         self.atom_masses = atom_masses
         m_cell = np.sum(atom_masses)
+        self.rho_T = m_cell/self.unit_cell_volume
         [bare_ph_eigen,
          bare_ph_energy] = phonopy_funcs.run_phonopy(phonon_file,
                                                      physics.q_XYZ_list_to_k_red_list(self.q_xyz, recip_XYZ_to_red))
