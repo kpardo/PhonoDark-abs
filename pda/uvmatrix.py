@@ -75,7 +75,6 @@ class UVMatrix:
 class UVMatPol():
     '''
     Calculates the T matrix for phonon-polariton contributions.
-    Inputs: ??
     Outputs: diagonalized T matrix
     '''
     q_vec: np.ndarray
@@ -210,14 +209,3 @@ class UVMatPol():
             print(np.linalg.eigvals(h_mat))
 
         return h_mat
-
-# @dataclass
-# class TMatPhonon(TransferMatrix):
-#     '''
-#     Inputs: energies, operator, approxs
-#     '''
-#     pass
-#
-# @dataclass
-# class TMatMagnon(TransferMatrix):
-#     pass

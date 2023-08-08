@@ -13,14 +13,16 @@ import pda.rate as r
 import pda.couplings as coup
 
 
-def reach(mass_list, q_XYZ_list, mat, coupling=None, snr_cut=3,
+def reach(mass_list, mat, q_XYZ_list=None, coupling=None, snr_cut=3,
           exposure=1*KG_YR, pol_mixing=False):
+    if q_XYZ_list == None:
+        # set default q mesh if none given as input
+        q_XYZ_list = r.generate_q_mesh(10**(-2), 5, 5)
     if coupling == None:
         # set default coupling, if none given as input
-        coupling = coup.Scalar(q_XYZ_list)
+        coup.ScalarE(q_XYZ_list=q_XYZ_list, omega=mass_list, mat=mat, mixing=False)
     rate = r.rate(mass_list, q_XYZ_list, mat,
                   coupling=coupling, pol_mixing=pol_mixing)
     reach = np.sqrt(snr_cut / (rate * exposure))
-    # return (reach*(u.eV)**(-1)).to(1./u.GeV)
-    # reach is actually dimensionless!!
+    ## dimensionless
     return reach

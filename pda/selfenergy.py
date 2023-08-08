@@ -8,13 +8,14 @@ from pda.constants import *
 from pda.material import Material
 import pda.couplings as coup
 import pda.dielectric as d
+import pda.rate as r
 
 
 @dataclass(kw_only=True)
 class SelfEnergy:
-    nu: np.ndarray
-    k: np.ndarray
+    omega: np.ndarray
     mat: Material
+    q_XYZ_list: None
     coupling: None
     lam: str
     pol_mixing: bool = True
@@ -22,9 +23,12 @@ class SelfEnergy:
     width_val: float = 10**(-2)
 
     def __post_init__(self):
+        if self.q_XYZ_list == None:
+            # set default q mesh if none given as input
+            self.q_XYZ_list = r.generate_q_mesh(10**(-2), 5, 5)
         if self.coupling == None:
             # set default coupling if none given as input
-            self.coupling = coup.Scalar(q_XYZ_list=self.k)
+            self.coupling = coup.Scalar(q_XYZ_list=self.q_XYZ_list)
         if self.coupling.mixing:
             self.mixing = True
         else:
@@ -43,12 +47,12 @@ class SelfEnergy:
         energies = self.mat.bare_ph_energy_o[0]
         if self.width == 'constant':
             width_list = self.width_val*np.ones((len(energies)))
-            prop = 1j * (-1.*energies[:, np.newaxis]**2 + self.nu **
-                     2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
+            prop = 1j * (-1.*energies[:, np.newaxis]**2 + self.omega **
+                     2 + 1j*widths[:, np.newaxis]*self.omega)**(-1)
         elif self.width == 'best':
             widths = self.width_val*energies
-            prop = 1j * (-1.*energies[:, np.newaxis]**2 + self.nu **
-                     2 + 1j*widths[:, np.newaxis]*self.nu)**(-1)
+            prop = 1j * (-1.*energies[:, np.newaxis]**2 + self.omega **
+                     2 + 1j*widths[:, np.newaxis]*self.omega)**(-1)
         else:
             raise NotImplementedError
         return prop
@@ -86,7 +90,6 @@ class SelfEnergy:
         else:
             se = se1
 
-        # final return has axes q, mat.energies[0], masslist=nu
         return se
 
     def mixing_contribution(self, se):
@@ -145,15 +148,12 @@ class SelfEnergy:
                                 self.totse, 
                                 self.formfacAA,
                                 np.conj(self.coupling.formfac))
-            print(np.shape(self.coupling.mixing_A_e))
-            print(np.shape(pi_phi_a_ph))
-            print(np.shape(pi_a_phi_ph))
             pi_phi_a = pi_phi_a_ph + self.coupling.mixing_A_e[:, np.newaxis, :, :]
             pi_a_phi = pi_a_phi_ph + self.coupling.mixing_A_e[:, np.newaxis, :, :]
             pi_mix_sq = np.einsum('wkac, wkca -> wk', pi_phi_a, pi_a_phi)
 
 
-        fullmix =  pi_mix_sq / ((self.nu**2)[:, np.newaxis] - piaa)
+        fullmix =  pi_mix_sq / ((self.omega**2)[:, np.newaxis] - piaa)
 
         finalse = se + fullmix.T
         
@@ -163,11 +163,11 @@ class SelfEnergy:
         '''
         \Pi_AA given by Eqn. 32 in the draft. But we can also just grab it from our dielectric code.
         '''
-        piaa_e = self.nu**2 * (1. - 1./3.*np.trace(self.mat.dielectric))
+        piaa_e = self.omega**2 * (1. - 1./3.*np.trace(self.mat.dielectric))
         charge_list = self.mat.Z_list - self.mat.get_Nj()
         
         self.formfacAA =  -E_EM*np.einsum('w, j, ab -> wjab', 
-                                self.nu, 
+                                self.omega, 
                                 charge_list, 
                                 np.identity(3))
         piaa_ph = (1/3.0)*np.einsum('jmkw, wjab, wmab -> wk', 

@@ -17,14 +17,17 @@ import pda.new_physics as physics
 import pda.new_diagonalization as diagonalization
 import pda.phonopy_funcs as phonopy_funcs
 from pda import __path__
+import pda.rate as r
 
 
 @dataclass
 class Material:
     name: str
-    q_xyz: np.ndarray
+    q_XYZ_list: np.ndarray = np.zeros((1))
 
     def __post_init__(self):
+        if self.q_XYZ_list == np.zeros((1)):
+            self.q_XYZ_list = r.generate_q_mesh(10**(-2), 5, 5)
         [self.dielectric, self.born, self.V_PC, self.m_cell,
             self.bare_ph_energy_o, self.bare_ph_eigen_o] = self.get_phonopy_data()
         self.energies, self.UVmats = self.get_energies()
@@ -35,17 +38,8 @@ class Material:
 
     def get_energies(self):
         [pol_energy_list, pol_T_list] = diagonalization.calculate_pol_E_T(
-            self.name, self.q_xyz)
+            self.name, self.q_XYZ_list)
 
-        # [pol_energy_list, pol_T_list] = uv.UVMatPol(q_vec=self.q_xyz
-        #                                             dielectric=self.dielectric
-        #                                             V_PC=self.V_pc
-        #                                             o_xi_vec=self.xi_vec_list
-        #                                             phot_eigenvecs:
-        #                                             o_phon_energy=self.bare_ph_energy_o
-        #                                             phot_energy:
-        #                                             dielectric_diag: np.ndarray
-        #                                             K_sq_mat: np.ndarray)
         return pol_energy_list, pol_T_list
 
     def get_phonopy_data(self):
@@ -88,7 +82,7 @@ class Material:
         self.rho_T = m_cell/self.unit_cell_volume
         [bare_ph_eigen,
          bare_ph_energy] = phonopy_funcs.run_phonopy(phonon_file,
-                                                     physics.q_XYZ_list_to_k_red_list(self.q_xyz, recip_XYZ_to_red))
+                                                     physics.q_XYZ_list_to_k_red_list(self.q_XYZ_list, recip_XYZ_to_red))
 
         bare_ph_energy_o = bare_ph_energy[:, 3:]
 
@@ -118,8 +112,3 @@ class Material:
             N_e_list.append( self.Z_list[s] - oxi_number)
 
         return np.array(N_e_list)
-
-    def get_fancy_name(self):
-        name = self.name
-        # FIXME
-        pass
