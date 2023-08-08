@@ -16,9 +16,7 @@ from pda.constants import *
 import pda.new_physics as physics
 import pda.new_diagonalization as diagonalization
 import pda.phonopy_funcs as phonopy_funcs
-import pda.uvmatrix as uv
 from pda import __path__
-# import re
 
 
 @dataclass

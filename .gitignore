@@ -8,3 +8,4 @@ pda/test_plots/*
 */.ipynb_checkpoints/*
 *.DS_Store
 pda.egg-info/*
+pda/old/*

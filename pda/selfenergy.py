@@ -7,7 +7,6 @@ import numpy as np
 from pda.constants import *
 from pda.material import Material
 import pda.couplings as coup
-import pda.transfer_matrix as tm
 import pda.dielectric as d
 
 
