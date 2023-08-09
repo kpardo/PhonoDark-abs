@@ -22,7 +22,7 @@ def reach(mass_list, mat, q_XYZ_list=None, coupling=None, snr_cut=3,
     if coupling == None:
         # set default coupling, if none given as input
         coup.ScalarE(q_XYZ_list=q_XYZ_list, omega=mass_list, mat=mat, mixing=False)
-    rate = r.rate(mass_list, q_XYZ_list, mat,
+    rate = r.rate(mass_list, mat, q_XYZ_list=q_XYZ_list,
                   coupling=coupling, pol_mixing=pol_mixing)
     reach = np.sqrt(snr_cut / (rate * exposure))
     ## dimensionless

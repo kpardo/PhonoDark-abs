@@ -15,7 +15,7 @@ import pda.new_physics as physics
 class SelfEnergy:
     omega: np.ndarray
     mat: Material
-    q_XYZ_list: None
+    q_XYZ_list: np.ndarray = np.zeros((1))
     coupling: None
     lam: str
     pol_mixing: bool = True
@@ -23,7 +23,7 @@ class SelfEnergy:
     width_val: float = 10**(-2)
 
     def __post_init__(self):
-        if self.q_XYZ_list == None:
+        if self.q_XYZ_list.all() == np.zeros((1)):
             # set default q mesh if none given as input
             self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         if self.coupling == None:

@@ -26,15 +26,15 @@ def get_vel_contrib(q_XYZ_list, vEVec):
     return int_vel_dist_val
 
 
-def rate(mass_list, mat, q_XYZ_list=None, coupling=None, pol_mixing=True, width='best', width_val=10**(-2)):
+def rate(mass_list, mat, q_XYZ_list=np.zeros((1)), coupling=None, pol_mixing=True, width='best', width_val=10**(-2)):
     '''
     calculates velocity distribution function
     Inputs: mass list, q list, material (optional: coupling, width type, width value)
     Outputs: rate as a function of mass
     '''
-    if q_XYZ_list == None:
+    if q_XYZ_list.all() == np.zeros((1)):
         q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
-    selfenergy = se.SelfEnergy(omega=mass_list, k=q_XYZ_list, mat=mat,
+    selfenergy = se.SelfEnergy(omega=mass_list, mat=mat, q_XYZ_list=q_XYZ_list,
                                coupling=coupling, pol_mixing=pol_mixing,
                                lam='vi', width=width, width_val=width_val)
     sesum = selfenergy.se

@@ -32,7 +32,6 @@ class Material:
         self.energies, self.UVmats = self.get_energies()
         self.xi_vec_list = self.get_xi_vecs()
         self.num_pol = len(self.UVmats[0])//2
-        self.tex_name = self.get_fancy_name()
         return 0
 
     def get_energies(self):

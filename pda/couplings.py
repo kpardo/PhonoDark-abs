@@ -5,12 +5,13 @@ couplings.py
 from dataclasses import dataclass
 import numpy as np
 from pda.constants import *
+import pda.new_physics as physics
 
 @dataclass
 class ScalarE:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray ## e.g., DM masses
     mat: None
+    q_XYZ_list: np.ndarray = np.zeros((1))
     name: str = 'scalar_e'
     texname: str = r'$\mathrm{Scalar~DM}$'
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
@@ -26,6 +27,8 @@ class ScalarE:
     cn: np.float64 = 0.
 
     def __post_init__(self):
+        if self.q_XYZ_list.all() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         Nj = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = Nn = self.mat.N_n_list
@@ -44,9 +47,9 @@ class ScalarE:
 
 @dataclass
 class DarkPhoton:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     mat: None
+    q_XYZ_list: np.ndarray = np.zeros((1))
     name: str = 'dark_photon'
     texname: str = r'$\mathrm{Vector~DM}$'
     texop: str = r'$\kappa e \phi_\mu\bar\psi \gamma^\mu\psi$'
@@ -60,6 +63,8 @@ class DarkPhoton:
     mixing: bool = False
 
     def __post_init__(self):
+        if self.q_XYZ_list.all() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -75,9 +80,9 @@ class DarkPhoton:
 
 @dataclass
 class BminusL:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     mat: None
+    q_XYZ_list: np.ndarray = np.zeros((1))
     name: str = 'bminsl'
     texname: str = r'$\mathrm{U}(1)\mathrm{b}$'
     texop: str = r'$g_B \phi_\mu\bar\psi \gamma^\mu\psi$'
@@ -91,6 +96,8 @@ class BminusL:
     mixing: bool = False
 
     def __post_init__(self):
+        if self.q_XYZ_list.all() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -106,10 +113,10 @@ class BminusL:
 
 @dataclass
 class ElectricDipole:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     mat: None
     S: np.ndarray = np.zeros((1)) # magnetic spin vector
+    q_XYZ_list: np.zeros((1))
     mo: bool = False
     name: str = 'electricdipole'
     texname: str = r'$\mathrm{Electric~Dipole}$'
@@ -125,6 +132,8 @@ class ElectricDipole:
     
 
     def __post_init__(self):
+        if self.q_XYZ_list.all() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         if self.mo:
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
@@ -168,10 +177,10 @@ class ElectricDipole:
 
 @dataclass
 class MagneticDipole:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     mat: None
     S: np.ndarray = np.zeros((1))  # magnetic spin vector
+    q_XYZ_list: np.ndarray = np.zeros((1))
     mo: bool = False ## magnetic ordering
     name: str = 'magneticdipole'
     texname: str = r'$\mathrm{Magnetic~Dipole}$'
@@ -187,6 +196,8 @@ class MagneticDipole:
     mixing: bool = False
 
     def __post_init__(self):
+        if self.q_XYZ_list == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         if self.mo:
             self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
@@ -227,10 +238,10 @@ class MagneticDipole:
 
 @dataclass
 class Axion:
-    q_XYZ_list: np.ndarray
     omega: np.ndarray  # e.g., DM masses
     S: np.ndarray # magnetic spin vector
     mat: None = None # don't really need, but whatever.
+    q_XYZ_list: np.ndarray = np.zeros((1))
     mixing: bool = False
     fermion_coupling: str = 'e'
     name: str = 'axion'
@@ -240,6 +251,8 @@ class Axion:
     se_shape: str = 'scalar'
 
     def __post_init__(self):
+        if self.q_XYZ_list.all() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
         self.texcoupconst, mfermion = self.get_coupconst()
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 

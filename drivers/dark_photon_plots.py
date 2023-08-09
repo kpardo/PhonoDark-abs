@@ -6,9 +6,6 @@ import astropy.units as u
 import pandas as pd
 
 import pda.material as material
-import pda.transfer_matrix as tm
-import pda.selfenergy as se
-import pda.rate as r
 import pda.reach as re
 import pda.constants as const
 import pda.couplings as coup
@@ -34,7 +31,7 @@ matplotlib.use('Agg')
 
 u.set_enabled_equivalencies(u.mass_energy())
 
-qs = r.generate_q_mesh(10**(-4), 5, 5)
+## set DM mass list
 mlist = np.logspace(-2,np.log10(0.5),int(1e3));
 
 ## load other limits
@@ -57,9 +54,9 @@ def plot_darkphot(ax=None, legend=True, mo=False, data=False):
     for i, m in enumerate(matlist):
         if ax==None:
             print(m)
-        mat = material.Material(m, qs)
-        coupling = coup.DarkPhoton(q_XYZ_list=qs, omega=mlist, mat=mat)
-        reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+        mat = material.Material(m)
+        coupling = coup.DarkPhoton(omega=mlist, mat=mat)
+        reach = re.reach(mlist, mat, coupling=coupling, pol_mixing=True)
         print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:

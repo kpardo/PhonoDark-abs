@@ -5,11 +5,9 @@ import seaborn as sns
 import astropy.units as u
 import pandas as pd
 
-import pda.material as material
-import pda.transfer_matrix as tm
-import pda.selfenergy as se
-import pda.rate as r
+
 import pda.reach as re
+import pda.material as material
 import pda.constants as const
 import pda.couplings as coup
 
@@ -23,7 +21,7 @@ sns.set_context("paper")
 sns.set_style('ticks')
 sns.set_palette('colorblind')
 figparams = {
-        'text.latex.preamble': r'\usepackage{amsmath} \boldmath',
+        'text.latex.preamble': r'\usepackage{amsmath} \usepackage{mhchem} \boldmath',
         'text.usetex':True,
         'axes.labelsize':22.,
         'xtick.labelsize':16,
@@ -38,8 +36,7 @@ matplotlib.use('Agg')
 
 u.set_enabled_equivalencies(u.mass_energy())
 
-qs = r.generate_q_mesh(10**(-4), 5, 5)
-# mlist = np.logspace(-2,np.log10(0.5),int(1e3));
+## set the mass list
 mlist = np.linspace(0.01, 1, int(1e5))
 
 ## load other limits
@@ -124,7 +121,7 @@ matlist = ['FeBr2', 'GaAs', 'Al2O3']
 fermions = ['e', 'n', 'p']
 colors = [3, 0, 1]
 for j,m in enumerate(matlist):
-        mat = material.Material(m, qs)
+        mat = material.Material(m)
         if m == 'FeBr2':
             with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
                 magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
@@ -132,14 +129,14 @@ for j,m in enumerate(matlist):
         else:
             S = np.array([0,0,0.5])
         for i,axx in enumerate(ax):
-                 coupling = coup.Axion(qs, omega=mlist, S=S, fermion_coupling=fermions[i], mat=mat)
-                 reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+                 coupling = coup.Axion(omega=mlist, S=S, fermion_coupling=fermions[i], mat=mat, mixing=True)
+                 reach = re.reach(mlist, mat, coupling=coupling, pol_mixing=True)
                 #  reach *= 1./mat.m_cell
                  print(np.min(reach))
                  if m == 'FeBr2':
-                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\ce{{{mat.name}}}$', lw=2)
                  else:
-                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\mathrm{{{mat.name}}} + \\mathbf{{S_\psi}} = ({S[0]}, {S[1]}, {S[2]})$', lw=2, ls='dashed')
+                    axx.loglog(mlist*1000, reach, color=cs[colors[j]], label=f'$\ce{{{mat.name}}} + \\mathbf{{S_\psi}} = ({S[0]}, {S[1]}, {S[2]})$', lw=2, ls='dashed')
 
 
 
