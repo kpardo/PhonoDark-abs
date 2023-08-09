@@ -8,27 +8,6 @@ import pda.selfenergy as se
 import pda.new_physics as physics
 
 
-def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
-    '''
-    creates x,y,z mesh of q values with given magnitude
-    distributed across sphere
-    '''
-    start = (0.5)/num_q_phi  # start and end away from pole
-
-    # sample thetas using arccos function to create more even grid?
-    betas = np.linspace(start, (1-start), num_q_theta)
-    thetas = np.arccos(2*betas - 1.)
-
-    phis = np.linspace(start*2*np.pi, 2*np.pi*(1-start), num_q_phi)
-    pp, tt = np.meshgrid(phis, thetas, indexing='xy')
-
-    xx = np.array([np.sin(tt)*np.cos(pp)], dtype=np.float64)
-    yy = np.array([np.sin(tt)*np.sin(pp)], dtype=np.float64)
-    zz = np.array([np.cos(tt)], dtype=np.float64)
-    qxyz = q_mag*np.vstack([xx, yy, zz]).T
-
-    return qxyz.reshape((num_q_theta*num_q_phi, 3))
-
 def get_vel_contrib(q_XYZ_list, vEVec):
     '''
     calculates velocity distribution function
@@ -54,7 +33,7 @@ def rate(mass_list, mat, q_XYZ_list=None, coupling=None, pol_mixing=True, width=
     Outputs: rate as a function of mass
     '''
     if q_XYZ_list == None:
-        q_XYZ_list = generate_q_mesh(10**(-2), 5, 5)
+        q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
     selfenergy = se.SelfEnergy(omega=mass_list, k=q_XYZ_list, mat=mat,
                                coupling=coupling, pol_mixing=pol_mixing,
                                lam='vi', width=width, width_val=width_val)

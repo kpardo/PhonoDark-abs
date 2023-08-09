@@ -695,3 +695,24 @@ def rot_matrix(direction, theta):
         ]
 
 	return rot
+
+def generate_q_mesh(q_mag, num_q_theta, num_q_phi):
+    '''
+    creates x,y,z mesh of q values with given magnitude
+    distributed across sphere
+    '''
+    start = (0.5)/num_q_phi  # start and end away from pole
+
+    # sample thetas using arccos function to create more even grid?
+    betas = np.linspace(start, (1-start), num_q_theta)
+    thetas = np.arccos(2*betas - 1.)
+
+    phis = np.linspace(start*2*np.pi, 2*np.pi*(1-start), num_q_phi)
+    pp, tt = np.meshgrid(phis, thetas, indexing='xy')
+
+    xx = np.array([np.sin(tt)*np.cos(pp)], dtype=np.float64)
+    yy = np.array([np.sin(tt)*np.sin(pp)], dtype=np.float64)
+    zz = np.array([np.cos(tt)], dtype=np.float64)
+    qxyz = q_mag*np.vstack([xx, yy, zz]).T
+
+    return qxyz.reshape((num_q_theta*num_q_phi, 3))

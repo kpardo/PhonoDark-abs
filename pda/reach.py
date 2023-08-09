@@ -11,13 +11,14 @@ from pda.material import Material
 import pda.selfenergy as se
 import pda.rate as r
 import pda.couplings as coup
+import pda.new_physics as physics
 
 
 def reach(mass_list, mat, q_XYZ_list=None, coupling=None, snr_cut=3,
           exposure=1*KG_YR, pol_mixing=False):
     if q_XYZ_list == None:
         # set default q mesh if none given as input
-        q_XYZ_list = r.generate_q_mesh(10**(-2), 5, 5)
+        q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
     if coupling == None:
         # set default coupling, if none given as input
         coup.ScalarE(q_XYZ_list=q_XYZ_list, omega=mass_list, mat=mat, mixing=False)
