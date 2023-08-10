@@ -15,15 +15,15 @@ import pda.new_physics as physics
 
 
 def reach(mass_list, mat, q_XYZ_list=None, coupling=None, snr_cut=3,
-          exposure=1*KG_YR, pol_mixing=False):
+          exposure=1*KG_YR):
     if q_XYZ_list == None:
         # set default q mesh if none given as input
-        q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
     if coupling == None:
         # set default coupling, if none given as input
-        coup.ScalarE(q_XYZ_list=q_XYZ_list, omega=mass_list, mat=mat, mixing=False)
+        coup.ScalarE(omega=mass_list, mat=mat, mixing=True)
     rate = r.rate(mass_list, mat, q_XYZ_list=q_XYZ_list,
-                  coupling=coupling, pol_mixing=pol_mixing)
+                  coupling=coupling)
     reach = np.sqrt(snr_cut / (rate * exposure))
     ## dimensionless
     return reach

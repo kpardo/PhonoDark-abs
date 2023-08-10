@@ -55,16 +55,16 @@ def plot_darkphot(ax=None, legend=True, mo=False, data=False):
         if ax==None:
             print(m)
         mat = material.Material(m)
-        coupling = coup.DarkPhoton(omega=mlist, mat=mat)
-        reach = re.reach(mlist, mat, coupling=coupling, pol_mixing=True)
+        coupling = coup.DarkPhoton(omega=mlist, mat=mat, mixing=True)
+        reach = re.reach(mlist, mat, coupling=coupling)
         print(np.min(reach))
-        ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+        ax.loglog(mlist*1000, reach*coupling.gx_conv, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:
         if data:
             ax.loglog(1,1, ls='dashed', color='black', label=r'$\mathrm{Data}$')
         ax.legend(fontsize=16, loc='lower right')
     if ax==None:
-        fig.savefig(f'../results/plots/{coupling.name}.pdf')
+        fig.savefig(f'../results/{coupling.name}.pdf')
     else:
         return ax
 # FIXME: move to plotting script
@@ -79,9 +79,9 @@ def plot_BL(ax=None, legend=True, mo=False, data=False):
     for i, m in enumerate(matlist):
         if ax==None:
             print(m)
-        mat = material.Material(m, qs)
-        coupling = coup.BminusL(q_XYZ_list=qs, omega=mlist, mat=mat)
-        reach = re.reach(mlist, qs, mat, coupling=coupling, pol_mixing=True)
+        mat = material.Material(m)
+        coupling = coup.BminusL(omega=mlist, mat=mat, mixing=True)
+        reach = re.reach(mlist, mat, coupling=coupling)
         print(np.min(reach))
         ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
     if legend:
@@ -89,66 +89,53 @@ def plot_BL(ax=None, legend=True, mo=False, data=False):
             ax.loglog(1,1, ls='dashed', color='black', label=r'$\mathrm{Data}$')
         ax.legend(fontsize=16, loc='lower right')
     if ax==None:
-        fig.savefig(f'../results/plots/{coupling.name}.pdf')
+        fig.savefig(f'../results/{coupling.name}.pdf')
     else:
         return ax
 
 ## start plotting -- steal some of Tanner's formatting
 ## plot each separately
 ## plot kinetic mixing first
-ncols = 1
+ncols = 2
 nrows = 1
 f, ax = plt.subplots(nrows=nrows, ncols=ncols,
                         figsize=(7*1.1*ncols, 7*nrows))
 
-ax.set_ylabel(r'$\kappa$')
-ax.set_xlabel(r'$m_V~[\rm{meV}]$')
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.minorticks_on()
-ax.set_xlim([10, 1000])
-ax.set_ylim([1.e-18, 1.e-14])
+ax[0].set_ylabel(r'$\kappa$')
+ax[0].set_xlabel(r'$m_V~[\rm{meV}]$')
+ax[0].set_xscale('log')
+ax[0].set_yscale('log')
+ax[0].minorticks_on()
+ax[0].set_xlim([10, 1000])
+ax[0].set_ylim([1.e-18, 1.e-14])
 
 ## plot our constraints
-plot_darkphot(ax=ax, legend=True, data=True)
-ax.plot((ga_kappa['mv'].to_numpy()*u.eV).value*1000, ga_kappa['kappa'], ls='dashed', c=cs[0])
-ax.plot((al_kappa['mv'].to_numpy()*u.eV).value*1000, al_kappa['kappa'], ls='dashed', c=cs[1])
-ax.plot((si_kappa['mv'].to_numpy()*u.eV).value*1000, si_kappa['kappa'], ls='dashed', c=cs[2])
+plot_darkphot(ax=ax[0], legend=True, data=True)
+ax[0].plot((ga_kappa['mv'].to_numpy()*u.eV).value*1000, ga_kappa['kappa'], ls='dashed', c=cs[0])
+ax[0].plot((al_kappa['mv'].to_numpy()*u.eV).value*1000, al_kappa['kappa'], ls='dashed', c=cs[1])
+ax[0].plot((si_kappa['mv'].to_numpy()*u.eV).value*1000, si_kappa['kappa'], ls='dashed', c=cs[2])
 
-
-
-## save fig.
-f.tight_layout()
-f.savefig('../results/plots/dark_photon_kineticmixing_fig.pdf')
-
-## plot g_B-L
-ncols = 1
-nrows = 1
-f, ax = plt.subplots(nrows=nrows, ncols=ncols,
-                        figsize=(7*1.1*ncols, 7*nrows))
-
-y_labels = [ r'$\kappa$', r'$g_{B-L}$']
-ax.set_ylabel(r'$g_{B-L}$')
-ax.set_xlabel(r'$m_V~[\rm{meV}]$')
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.minorticks_on()
-ax.set_xlim([10, 1000])
-ax.set_ylim([1.e-19, 1.e-13])
+## g_B-L
+ax[1].set_ylabel(r'$g_{B-L}$')
+ax[1].set_xlabel(r'$m_V~[\rm{meV}]$')
+ax[1].set_xscale('log')
+ax[1].set_yscale('log')
+ax[1].minorticks_on()
+ax[1].set_xlim([10, 1000])
+ax[1].set_ylim([1.e-19, 1.e-13])
 
 ## plot our constraints
-plot_BL(ax=ax, legend=True, data=True)
+plot_BL(ax=ax[1], legend=True, data=True)
 
 ## plot other limits
-
-ax.plot(ff['mass [eV]'].to_numpy()*1000, ff['g_BL'].to_numpy(), c=cs[5])
-ax.fill_between(ff['mass [eV]'].to_numpy()*1000, 
+ax[1].plot(ff['mass [eV]'].to_numpy()*1000, ff['g_BL'].to_numpy(), c=cs[5])
+ax[1].fill_between(ff['mass [eV]'].to_numpy()*1000, 
 ff['g_BL'].to_numpy(), 
 1.e-10*np.ones(len(ff)), color=cs[5], alpha=0.3
 )
-ax.text(10**1.05, 3*10**-13, r'$\mathrm{Fifth} \; \mathrm{Force}$',
+ax[1].text(10**1.05, 3*10**-13, r'$\mathrm{Fifth} \; \mathrm{Force}$',
             rotation = 0, fontsize = 30, color = cs[5])
 
 ## save fig.
 f.tight_layout()
-f.savefig('../results/plots/dark_photon_gBL_fig.pdf')
+f.savefig('../results/vector_fig.pdf')

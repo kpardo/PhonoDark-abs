@@ -25,13 +25,13 @@ class Material:
     q_XYZ_list: np.ndarray = np.zeros((1))
 
     def __post_init__(self):
-        if self.q_XYZ_list == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         [self.dielectric, self.born, self.V_PC, self.m_cell,
             self.bare_ph_energy_o, self.bare_ph_eigen_o] = self.get_phonopy_data()
-        self.energies, self.UVmats = self.get_energies()
-        self.xi_vec_list = self.get_xi_vecs()
-        self.num_pol = len(self.UVmats[0])//2
+        # self.energies, self.UVmats = self.get_energies()
+        # self.xi_vec_list = self.get_xi_vecs()
+        # self.num_pol = len(self.UVmats[0])//2
         return 0
 
     def get_energies(self):
@@ -82,9 +82,11 @@ class Material:
          bare_ph_energy] = phonopy_funcs.run_phonopy(phonon_file,
                                                      physics.q_XYZ_list_to_k_red_list(self.q_XYZ_list, recip_XYZ_to_red))
 
+        self.q_red_list = physics.q_XYZ_list_to_k_red_list(self.q_XYZ_list, recip_XYZ_to_red)
         bare_ph_energy_o = bare_ph_energy[:, 3:]
 
         bare_ph_eigen_o = bare_ph_eigen[:, 3:, :, :]
+        self.bare_ph_eigen = bare_ph_eigen
         return dielectric, born, V_PC, m_cell, bare_ph_energy_o, bare_ph_eigen_o
 
     def get_xi_vecs(self):

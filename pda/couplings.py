@@ -17,8 +17,8 @@ class ScalarE:
     texop: str = r'$d_{\phi e e} \frac{\sqrt{4\pi}m_e}{M_{\mathrm{Pl}}} \phi \bar{\psi}\psi$'
     texcoupconst: str = r'$d_{\phi e e}$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1. * (4 * np.pi)**(-1) * (M_ELEC/M_PL)**2
-    # prefac: np.float64 = 1.
+    prefac: np.float64 = 1.
+    gx_conv: np.float64 = 1./np.sqrt(4 * np.pi) * (M_PL/M_ELEC)
     se_shape: str = 'scalar'
     mixing_phia: np.ndarray = np.zeros((1))
     mixing: bool = False
@@ -27,8 +27,8 @@ class ScalarE:
     cn: np.float64 = 0.
 
     def __post_init__(self):
-        if self.q_XYZ_list.all() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         Nj = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = Nn = self.mat.N_n_list
@@ -55,7 +55,8 @@ class DarkPhoton:
     texop: str = r'$\kappa e \phi_\mu\bar\psi \gamma^\mu\psi$'
     texcoupconst: str = r'$\kappa$'
     formfac: np.ndarray = np.zeros((1))
-    prefac: np.float64 = 1. # e's cancel from conversion from g to kappa
+    prefac: np.float64 = 1.
+    gx_conv: np.float64 = 1./np.sqrt( 4*np.pi / 137. )
     se_shape: str = 'vector'
     ce: np.float64 = 1.
     cp: np.float64 = -1.
@@ -63,8 +64,8 @@ class DarkPhoton:
     mixing: bool = False
 
     def __post_init__(self):
-        if self.q_XYZ_list.all() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -75,7 +76,7 @@ class DarkPhoton:
         if self.mixing:
             eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
             piaa_e = self.omega**2 * ( 1.0 - eps_infty )
-            self.mixing_A_e =  E_EM**(-1) * \
+            self.mixing_A_e =  self.ce * E_EM**(-1) * \
                 np.einsum('w, ab -> wab', piaa_e, np.identity(3))
 
 @dataclass
@@ -89,6 +90,7 @@ class BminusL:
     texcoupconst: str = r'$g_{B-L}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 1.
+    gx_conv: np.float64 = 1.
     se_shape: str = 'vector'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
@@ -96,8 +98,8 @@ class BminusL:
     mixing: bool = False
 
     def __post_init__(self):
-        if self.q_XYZ_list.all() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -108,7 +110,7 @@ class BminusL:
         if self.mixing:
             eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
             piaa_e = self.omega**2 * ( 1.0 - eps_infty )
-            self.mixing_A_e =  E_EM**(-1) * \
+            self.mixing_A_e =  self.ce * E_EM**(-1) * \
                 np.einsum('w, ab -> wab', piaa_e, np.identity(3))
 
 @dataclass
@@ -116,7 +118,7 @@ class ElectricDipole:
     omega: np.ndarray  # e.g., DM masses
     mat: None
     S: np.ndarray = np.zeros((1)) # magnetic spin vector
-    q_XYZ_list: np.zeros((1))
+    q_XYZ_list: np.ndarray = np.zeros((1))
     mo: bool = False
     name: str = 'electricdipole'
     texname: str = r'$\mathrm{Electric~Dipole}$'
@@ -132,8 +134,8 @@ class ElectricDipole:
     
 
     def __post_init__(self):
-        if self.q_XYZ_list.all() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         if self.mo:
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
@@ -196,8 +198,8 @@ class MagneticDipole:
     mixing: bool = False
 
     def __post_init__(self):
-        if self.q_XYZ_list == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if (self.q_XYZ_list).any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         if self.mo:
             self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
@@ -251,8 +253,8 @@ class Axion:
     se_shape: str = 'scalar'
 
     def __post_init__(self):
-        if self.q_XYZ_list.all() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10**(-2), 5, 5)
+        if self.q_XYZ_list.any() == np.zeros((1)):
+            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
         self.texcoupconst, mfermion = self.get_coupconst()
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 

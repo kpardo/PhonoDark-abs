@@ -52,7 +52,7 @@ class Dielectric:
          V_PC] = phonopy_funcs.get_phonon_file_data(phonon_file, name)
         [bare_ph_eigen,
          bare_ph_energy] = phonopy_funcs.run_phonopy(phonon_file,
-                                                     physics.q_XYZ_list_to_k_red_list(self.mat.q_xyz, recip_XYZ_to_red))
+                                                     physics.q_XYZ_list_to_k_red_list(self.mat.q_XYZ_list, recip_XYZ_to_red))
         bare_ph_energy_o = bare_ph_energy[:, 3:]
         bare_ph_eigen_o = bare_ph_eigen[:, 3:, :, :]
         return bare_ph_energy_o[0], bare_ph_eigen_o[0], V_PC, atom_masses, epsinf

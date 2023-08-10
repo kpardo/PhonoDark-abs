@@ -5,7 +5,6 @@ import astropy.units as u
 import pandas as pd
 
 import pda.material as material
-import pda.transfer_matrix as tm
 import pda.selfenergy as se
 import pda.rate as r
 import pda.reach as re
@@ -35,8 +34,7 @@ matplotlib.use('Agg')
 
 u.set_enabled_equivalencies(u.mass_energy())
 
-qs = r.generate_q_mesh(10**(-4), 5, 5)
-mlist = np.logspace(-2,np.log10(0.5),int(1e3));
+mlist = np.linspace(0.01, 1, int(1e5))
 
 ### load other constraints
 ff = pd.read_csv('../data/limit_data/AxionLimits/FifthForce.txt', skiprows=3, delimiter='\s+', names=['mass [eV]', 'd_e'])
@@ -55,15 +53,15 @@ def plot_coupling(ax=None, legend=True, mo=False):
     for i, m in enumerate(matlist):
         if ax==None:
             print(m)
-        mat = material.Material(m, qs)
-        co = coup.ScalarE(q_XYZ_list=qs, omega=mlist, mat=mat)
-        reach = re.reach(mlist, qs, mat, coupling=co, pol_mixing=True)
-        ax.loglog(mlist*1000, reach, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
-        print(np.min(reach))
+        mat = material.Material(m)
+        co = coup.ScalarE(omega=mlist, mat=mat, mixing=True)
+        reach = re.reach(mlist, mat, coupling=co)
+        ax.loglog(mlist*1000, reach*co.gx_conv, color=cs[i], label=f'$\mathrm{{{mat.name}}}$', lw=2)
+        print(np.min(reach*co.gx_conv))
     if legend:
         ax.legend(fontsize=16, loc='lower right')
     if ax==None:
-        fig.savefig(f'../results/plots/{coupling.name}.pdf')
+        fig.savefig(f'../results/{coupling.name}.pdf')
     else:
         return ax
 
@@ -80,7 +78,7 @@ ax.fill_between(wd['mass [eV]']*1000, wd['d_e'], 1.e30*np.ones(len(wd)), alpha=0
 plot_coupling(ax=ax, legend=True)
 plt.yscale('log')
 plt.xscale('log')
-plt.ylim([1.e4, 1.e11])
+plt.ylim([1.e4, 1.e9])
 plt.xlim([10, 1000])
 plt.ylabel(r'$d_e$')
 plt.xlabel(r'$m_\phi \, [\mathrm{meV}]$')
@@ -89,4 +87,4 @@ plt.text(10**1.025, 10**4.8, r'$\mathrm{Fifth}\;\mathrm{Force}$',
 plt.text(10**1.05, 10**6.75, r'$\mathrm{RG}$', fontsize = 25, color = cs[4])
 plt.text(10**1.05, 10**6.1, r'$\mathrm{WD}$', fontsize = 25, color = cs[7])
 plt.tight_layout()
-plt.savefig('../results/plots/scalar_de.pdf')
+plt.savefig('../results/scalar_de.pdf')
