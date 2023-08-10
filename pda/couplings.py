@@ -28,7 +28,7 @@ class ScalarE:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         Nj = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = Nn = self.mat.N_n_list
@@ -65,7 +65,7 @@ class DarkPhoton:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -99,7 +99,7 @@ class BminusL:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         Ne = self.mat.get_Nj()
         Np = self.mat.Z_list
         Nn = self.mat.N_n_list
@@ -135,7 +135,7 @@ class ElectricDipole:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         if self.mo:
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
@@ -199,7 +199,7 @@ class MagneticDipole:
 
     def __post_init__(self):
         if (self.q_XYZ_list).any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         if self.mo:
             self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
@@ -254,7 +254,7 @@ class Axion:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         self.texcoupconst, mfermion = self.get_coupconst()
         self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
 

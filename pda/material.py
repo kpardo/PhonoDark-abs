@@ -26,7 +26,7 @@ class Material:
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         [self.dielectric, self.born, self.V_PC, self.m_cell,
             self.bare_ph_energy_o, self.bare_ph_eigen_o] = self.get_phonopy_data()
         # self.energies, self.UVmats = self.get_energies()

@@ -33,7 +33,7 @@ def rate(mass_list, mat, q_XYZ_list=np.zeros((1)), coupling=None, pol_mixing=Tru
     Outputs: rate as a function of mass
     '''
     if q_XYZ_list.any() == np.zeros((1)):
-        q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+        q_XYZ_list = Q_XYZ
     selfenergy = se.SelfEnergy(omega=mass_list, mat=mat, q_XYZ_list=q_XYZ_list,
                                coupling=coupling, pol_mixing=pol_mixing,
                                width=width, width_val=width_val)

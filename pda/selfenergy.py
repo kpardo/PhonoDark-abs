@@ -24,7 +24,7 @@ class SelfEnergy:
     def __post_init__(self):
         if self.q_XYZ_list.all() == np.zeros((1)):
             # set default q mesh if none given as input
-            self.q_XYZ_list = physics.generate_q_mesh(10, 5, 5)
+            self.q_XYZ_list = Q_XYZ
         if self.coupling == None:
             # set default coupling if none given as input
             self.coupling = coup.Scalar(q_XYZ_list=self.q_XYZ_list)
