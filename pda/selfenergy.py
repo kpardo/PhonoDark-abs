@@ -65,6 +65,10 @@ class SelfEnergy:
         if self.coupling.se_shape == 'scalar':
             se1 = np.einsum('jmkw, jwka, mwka -> kw', self.totse,
                            self.coupling.formfac, np.conj(self.coupling.formfac))
+        
+        elif self.coupling.se_shape == 'axion':
+            se1 = np.einsum('jmkw, wjb, wmb -> kw', self.totse,
+                           self.coupling.formfac, np.conj(self.coupling.formfac))
 
         elif self.coupling.se_shape == 'vector':
             se1 = np.einsum('jmkw, jwab, mwab -> kw', 
@@ -111,6 +115,19 @@ class SelfEnergy:
             pi_mix_sq = np.einsum('wkb, wkb -> wk', pi_phi_a_ph + self.coupling.mixing_A_e,
                                 pi_a_phi_ph + self.coupling.mixing_A_e)
 
+        elif self.coupling.se_shape == 'axion':
+            pi_phi_a_ph = np.einsum('jmkw, wja, wmab -> wkb', 
+                                self.totse, 
+                                self.coupling.formfac, 
+                                np.conj(self.formfacAA))
+            pi_a_phi_ph = np.einsum('jmkw, wjab, wmb -> wka', 
+                                self.totse, 
+                                self.formfacAA,
+                                np.conj(self.coupling.formfac))
+            pi_mix_sq = np.einsum('wkb, wkb -> wk', pi_phi_a_ph + self.coupling.mixing_A_e[:, np.newaxis, :],
+                                pi_a_phi_ph - self.coupling.mixing_A_e[:, np.newaxis, :])
+
+        
         elif self.coupling.se_shape == 'vector':
             pi_phi_a_ph = np.einsum('jmkw, jwab, wmcb -> wkac', 
                                 self.totse, 

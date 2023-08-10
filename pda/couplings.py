@@ -61,7 +61,7 @@ class DarkPhoton:
     ce: np.float64 = 1.
     cp: np.float64 = -1.
     cn: np.float64 = 0.
-    mixing: bool = False
+    mixing: bool = True
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
@@ -95,7 +95,7 @@ class BminusL:
     ce: np.float64 = 1.
     cp: np.float64 = 0.
     cn: np.float64 = 0.
-    mixing: bool = False
+    mixing: bool = True
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
@@ -130,7 +130,7 @@ class ElectricDipole:
     ce: np.float64 = 1.
     cp: np.float64 = 0.
     cn: np.float64 = 0.
-    mixing: bool = False
+    mixing: bool = True
     
 
     def __post_init__(self):
@@ -195,7 +195,7 @@ class MagneticDipole:
     ce: np.float64 = 1.
     cp: np.float64 = 0.
     cn: np.float64 = 0.
-    mixing: bool = False
+    mixing: bool = True
 
     def __post_init__(self):
         if (self.q_XYZ_list).any() == np.zeros((1)):
@@ -240,38 +240,57 @@ class MagneticDipole:
 
 @dataclass
 class Axion:
-    omega: np.ndarray  # e.g., DM masses
+    omega: np.ndarray  # e.g., DM masses  
     S: np.ndarray # magnetic spin vector
     mat: None = None # don't really need, but whatever.
     q_XYZ_list: np.ndarray = np.zeros((1))
-    mixing: bool = False
+    mixing: bool = True
     fermion_coupling: str = 'e'
     name: str = 'axion'
     texname: str = r'$\mathrm{Axion}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 1.
-    se_shape: str = 'scalar'
+    gx_conv: np.float64 = 1.
+    se_shape: str = 'axion'
 
     def __post_init__(self):
         if self.q_XYZ_list.any() == np.zeros((1)):
             self.q_XYZ_list = Q_XYZ
         self.texcoupconst, mfermion = self.get_coupconst()
-        self.formfac = np.einsum('w,jb -> jwb', -1j*self.omega**2/mfermion, self.S)
+        self.formfac = np.einsum('w,jb -> wjb', -1j*self.omega**2/mfermion, self.S)
+        if self.mixing:
+            eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
+            s_hat_e = np.einsum('ji-> i', self.S)
+            # normalize s_hat_e
+            if np.linalg.norm(s_hat_e) > 1:
+                s_hat_e = s_hat_e / np.linalg.norm(s_hat_e)
+            self.mixing_A_e = self.ce * (-1j*(E_EM*M_ELEC)**(-1)) * ( 
+                        np.einsum('w, i -> wi', self.omega**3, s_hat_e) * ( 1.0 - eps_infty ) )
+
 
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
+            self.ce = 1.
+            self.cn = 0.
+            self.cp = 0.
             return r'$g_{aee}$', M_ELEC
         elif self.fermion_coupling == 'n':
             Nn = self.mat.N_n_list
             self.S = self.S*np.ones((len(Nn), 3))
             self.S = Nn[:, np.newaxis]*self.S
+            self.ce = 0.
+            self.cn = 1.
+            self.cp = 0.
             return r'$g_{ann}$', M_NEUTRON
         elif self.fermion_coupling == 'p':
             Np = self.mat.Z_list
             self.S = self.S*np.ones((len(Np), 3))
             self.S = Np[:, np.newaxis]*self.S
+            self.ce = 0.
+            self.cn = 0.
+            self.cp = 1.
             return r'$g_{app}$', M_PROTON
         else:
             raise Warning('Not a valid fermion type!')

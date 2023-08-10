@@ -17,12 +17,13 @@ rc('text.latex', preamble=r'\usepackage{amsmath}\usepackage{amssymb}\usepackage[
 
 cs = sns.color_palette("Set1")
 color_list_cont = sns.color_palette("viridis", as_cmap=True)
+lslist = ['solid', 'solid', 'solid']
 
-
-def plot_coupling(ax, couplist, colors, legend=False):
+def plot_coupling(ax, couplist, colors, legend=False, ls=lslist):
     for i, c in enumerate(couplist):
         reach = re.reach(c.omega, c.mat, coupling=c)
-        ax.plot(np.log10(c.omega*1000), np.log10(reach*c.gx_conv), color=colors[i], lw=2)
+        ax.plot(np.log10(c.omega*1000), np.log10(reach*c.gx_conv), color=colors[i], 
+                lw=1, ls=ls[i])
         print(np.min(reach*c.gx_conv))
     if legend:
         ax.legend()
