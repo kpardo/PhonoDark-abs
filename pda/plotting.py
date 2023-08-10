@@ -18,6 +18,16 @@ rc('text.latex', preamble=r'\usepackage{amsmath}\usepackage{amssymb}\usepackage[
 cs = sns.color_palette("Set1")
 color_list_cont = sns.color_palette("viridis", as_cmap=True)
 
+
+def plot_coupling(ax, couplist, colors, legend=False):
+    for i, c in enumerate(couplist):
+        reach = re.reach(c.omega, c.mat, coupling=c)
+        ax.plot(np.log10(c.omega*1000), np.log10(reach*c.gx_conv), color=colors[i], lw=2)
+        print(np.min(reach*c.gx_conv))
+    if legend:
+        ax.legend()
+    return ax
+
 def set_custom_tick_options(ax, 
                      minor_bottom = True, 
                      minor_top    = True, 
@@ -302,3 +312,41 @@ def set_log_yticks2(ax, minval, maxval,
     
     ax.set_ylim(plot_min, plot_max)
 
+def plot_filled_region(axes, x_data, y_1_data, y_2_data, 
+                       color = 'black', linestyle = '-', alpha = 0.25,
+                       bound_line = True):
+    
+    if np.shape(np.array(y_2_data)) == ():
+        
+        y_2_data_ext = np.linspace(y_2_data, y_2_data, len(y_1_data))
+        
+    else:
+        
+        y_2_data_ext = y_2_data
+        
+    if bound_line:
+    
+        axes.plot(
+            x_data,
+            y_1_data,
+            linewidth = 2,
+            linestyle = linestyle,
+            color = color
+        )
+
+        axes.plot(
+            x_data,
+            y_2_data_ext,
+            linewidth = 2,
+            linestyle = linestyle,
+            color = color
+        )
+
+    axes.fill_between(
+        x_data,
+        y_1_data,
+        y_2_data_ext,
+        color = color,
+        alpha = alpha,
+        linewidth = 0
+    )

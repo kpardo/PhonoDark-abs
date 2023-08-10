@@ -21,7 +21,7 @@ class ScalarE:
     gx_conv: np.float64 = 1./np.sqrt(4 * np.pi) * (M_PL/M_ELEC)
     se_shape: str = 'scalar'
     mixing_phia: np.ndarray = np.zeros((1))
-    mixing: bool = False
+    mixing: bool = True
     ce: np.float64 = 1.
     cp: np.float64 = 0.
     cn: np.float64 = 0.
