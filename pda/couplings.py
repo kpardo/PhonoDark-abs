@@ -126,6 +126,7 @@ class ElectricDipole:
     texcoupconst: str = r'$d_{E}$'
     formfac: np.ndarray = np.zeros((1))
     prefac: np.float64 = 1.
+    gx_conv: np.float64 = 1.e9
     se_shape: str = 'dim5'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
@@ -191,6 +192,7 @@ class MagneticDipole:
     formfac: np.ndarray = np.zeros((1))
     # prefac: np.float64 = 1. / E_EM**2
     prefac: np.float64 = 1.
+    gx_conv: np.float64 = 1.e9
     se_shape: str = 'dim5'
     ce: np.float64 = 1.
     cp: np.float64 = 0.
