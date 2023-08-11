@@ -19,7 +19,7 @@ import astropy.constants as const
 import pandas as pd
 
 DATA_DIR = '../data'
-mlist = np.logspace(-2,np.log10(0.5),int(1e5))
+mlist = np.linspace(0.01,0.5,int(1e5))
 
 colorlist = ['firebrick', 'midnightblue', 'forestgreen']
 

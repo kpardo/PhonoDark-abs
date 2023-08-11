@@ -62,26 +62,23 @@ class Dielectric:
             widths = self.width_val*np.ones((len(energies)))
             propdenom = (energies[:, np.newaxis]**2 - self.mass **
                      2 + 1j*widths[:, np.newaxis]*self.mass)**(-1)
-        elif self.width_type == 'proportional':
+        elif self.width_type == 'best':
             widths = self.width_val*energies
             propdenom = (energies[:, np.newaxis]**2 - self.mass **
-                     2 + 1j*widths[:, np.newaxis]*self.mass)**(-1)
-        elif self.width_type == 'best':
-            widths = self.width_val*np.ones((len(energies)))
-            propdenom = (energies[:, np.newaxis]**2 - self.mass **
-                     2 - 1j*widths[:, np.newaxis]*self.mass**2)**(-1)
-        xi = np.einsum('jik, j, nji -> ni', self.mat.born, 1. /
+                     2 - 1j*widths[:, np.newaxis]*self.mass)**(-1)
+        xi = np.einsum('jik, j, mjk -> mi', self.mat.born, 1. /
                        np.sqrt(atom_masses), eigenvectors)
-        eigs = np.einsum('li, lk -> lik', xi, np.conj(xi))
-        fullprop = np.einsum('lik, lm -> ikm', eigs, propdenom)
-
-        return epsinf[:, :, np.newaxis] + E_EM**2/vpc * fullprop
+        eigs = 1./3.*np.einsum('mi, mi -> m', xi, np.conj(xi))
+        fullprop = np.einsum('m, mw -> w', eigs, propdenom)
+        return 1./3.*np.trace(epsinf) + E_EM**2/(vpc) * fullprop
 
     def get_eps(self):
-        return 1./3.*np.trace(self.dielectric, axis1=0, axis2=1)
+        # return 1./3.*np.trace(self.dielectric, axis1=0, axis2=1)
+        return self.dielectric
 
     def get_imeps(self):
         # use trick from stack exchange to get inv
         # https://stackoverflow.com/questions/41850712/compute-inverse-of-2d-arrays-along-the-third-axis-in-a-3d-array-without-loops
-        inv = np.linalg.inv(self.dielectric.T).T
-        return 1./3.*np.trace(inv, axis1=0, axis2=1)
+        # inv = np.linalg.inv(self.dielectric.T).T
+        # return 1./3.*np.trace(inv, axis1=0, axis2=1)
+        return 1./self.eps
