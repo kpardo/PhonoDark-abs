@@ -14,7 +14,6 @@ import re
 
 from pda.constants import *
 import pda.new_physics as physics
-import pda.new_diagonalization as diagonalization
 import pda.phonopy_funcs as phonopy_funcs
 from pda import __path__
 
@@ -29,16 +28,7 @@ class Material:
             self.q_XYZ_list = Q_XYZ
         [self.dielectric, self.born, self.V_PC, self.m_cell,
             self.bare_ph_energy_o, self.bare_ph_eigen_o] = self.get_phonopy_data()
-        # self.energies, self.UVmats = self.get_energies()
-        # self.xi_vec_list = self.get_xi_vecs()
-        # self.num_pol = len(self.UVmats[0])//2
         return 0
-
-    def get_energies(self):
-        [pol_energy_list, pol_T_list] = diagonalization.calculate_pol_E_T(
-            self.name, self.q_XYZ_list)
-
-        return pol_energy_list, pol_T_list
 
     def get_phonopy_data(self):
         dir_path = os.path.join(os.path.dirname(__path__[0]), "data")
@@ -88,11 +78,6 @@ class Material:
         bare_ph_eigen_o = bare_ph_eigen[:, 3:, :, :]
         self.bare_ph_eigen = bare_ph_eigen
         return dielectric, born, V_PC, m_cell, bare_ph_energy_o, bare_ph_eigen_o
-
-    def get_xi_vecs(self):
-        xi_vec_list = physics.create_xi_vecs(
-            self.born, self.bare_ph_eigen_o, self.atom_masses)
-        return xi_vec_list
 
     def get_Nj(self):
         ## from Tanner
