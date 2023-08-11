@@ -98,7 +98,7 @@ Slist = []
 # with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
                 # magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
                 # Slist.append(magnetism_doc[0].magmoms)
-Slist.append([3.6, 0, 0]) #FeBr2
+Slist.append([0, 0, 1.8]) #FeBr2
 Slist.append([0,0,0.5])
 Slist.append([0,0,0.5])
 couplist = [coup.Axion(omega=mlist, mat=m, S=s) for (m,s) in zip(mats, Slist)]
