@@ -156,11 +156,11 @@ class SelfEnergy:
             pi_mix_sq = np.einsum('wkac, wkca -> wk', pi_phi_a, pi_a_phi)
 
         elif self.coupling.se_shape == 'dim5_s':
-            pi_phi_a_ph = np.einsum('jmkw, jwai, wmcb -> wkac', 
+            pi_phi_a_ph = np.einsum('jmkw, jwab, wmcb -> wkac', 
                                 self.totse, 
                                 self.coupling.formfac, 
                                 np.conj(self.formfacAA))
-            pi_a_phi_ph = np.einsum('jmkw, wmcb, jwai -> wkac', 
+            pi_a_phi_ph = np.einsum('jmkw, wjab, mwcb -> wkac', 
                                 self.totse, 
                                 self.formfacAA,
                                 np.conj(self.coupling.formfac))

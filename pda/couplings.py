@@ -139,7 +139,8 @@ class ElectricDipole:
             self.q_XYZ_list = Q_XYZ
         if self.mo:
             Nj = self.mat.get_Nj()
-            self.S = self.S*np.ones((len(Nj), 3))
+            if np.shape(self.S) == (3,):
+                self.S = self.S*np.ones((len(Nj), 3))
             qhat = 1./np.linalg.norm(self.q_XYZ_list, axis=1)[:, np.newaxis]*self.q_XYZ_list
             
             Fe = (np.einsum('w, kc, jc, ab -> jwabk', 
@@ -158,8 +159,6 @@ class ElectricDipole:
             eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
             qhat = 1./np.linalg.norm(self.q_XYZ_list,
                                      axis=1)[:, np.newaxis]*self.q_XYZ_list
-            Nj = self.mat.get_Nj()
-            self.S = self.S*np.ones((len(Nj), 3))
             s_hat_e = np.einsum('ji-> i', self.S)
             ## normalize s_hat_e
             if np.linalg.norm(s_hat_e) > 1:
@@ -182,7 +181,7 @@ class ElectricDipole:
 class MagneticDipole:
     omega: np.ndarray  # e.g., DM masses
     mat: None
-    S: np.ndarray = np.zeros((1))  # magnetic spin vector
+    S: np.ndarray # magnetic spin vector
     q_XYZ_list: np.ndarray = np.zeros((1))
     mo: bool = False ## magnetic ordering
     name: str = 'magneticdipole'
@@ -205,16 +204,18 @@ class MagneticDipole:
         if self.mo:
             self.se_shape = 'dim5_s'
             Nj = self.mat.get_Nj()
-            self.S = self.S*np.ones((len(Nj), 3))
+            if np.shape(self.S) == (3,):
+                self.S = self.S*np.ones((len(Nj), 3))
             Fe = (np.einsum('w, jb, bai -> jwai',
                             -2.*1j*self.omega**2,
                             self.S, self.levicivita()))
             self.formfac = self.ce * Fe
             if self.mixing:
                 eps_infty = (1/3.0)*np.trace(self.mat.dielectric)
-                Nj = self.mat.get_Nj()
-                self.S = self.S*np.ones((len(Nj), 3))
                 s_hat_e = np.einsum('ji-> i', self.S)
+                ## normalize s_hat_e
+                if np.linalg.norm(s_hat_e) > 1:
+                    s_hat_e = s_hat_e / np.linalg.norm(s_hat_e)
                 self.mixing_A_e = self.ce* (-2*1j*(E_EM)**(-1)) * ( 
                         np.einsum('w, m, ikm -> wik', self.omega**3, s_hat_e, self.levicivita()) * ( 1.0 - eps_infty ) )
         else:
@@ -273,7 +274,8 @@ class Axion:
     def get_coupconst(self):
         if self.fermion_coupling == 'e':
             Nj = self.mat.get_Nj()
-            self.S = self.S*np.ones((len(Nj), 3))
+            if np.shape(self.S) == (3,):
+                self.S = self.S*np.ones((len(Nj), 3))
             self.ce = 1.
             self.cn = 0.
             self.cp = 0.

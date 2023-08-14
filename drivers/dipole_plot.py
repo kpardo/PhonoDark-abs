@@ -46,18 +46,27 @@ for c in range(ncols):
                     step=2)
 
 ## plot our limits
-matlist = ['FeBr2', 'GaAs', 'Al2O3']
+matlist = ['FeBr2']
 mats = [material.Material(m) for m in matlist]
-lslist = ['solid', ':', ':']
+lslist = ['solid']
+Slist = np.array([
+            [0.0, 0.0, 1.8],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0]]
+        )
+couplist = [coup.ElectricDipole(omega=mlist, mat=mats[0], S=Slist, mo=True)]
+plot_coupling(axes[1], couplist, colors=['darkorange'], ls=lslist)
+couplist = [coup.MagneticDipole(omega=mlist, mat=mats[0], S=Slist, mo=True)]
+plot_coupling(axes[0], couplist, colors=['darkorange'], ls=lslist)
+
+matlist = ['GaAs', 'Al2O3']
+mats = [material.Material(m) for m in matlist]
+lslist = [':', ':']
 Slist = []
-# with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
-                # magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
-                # Slist.append(magnetism_doc[0].magmoms)
-Slist.append([0, 0, 1.8]) #FeBr2
 Slist.append([0, 0, 0.5]) #GaAs
 Slist.append([0, 0, 0.5]) #Al2O3
 couplist = [coup.ElectricDipole(omega=mlist, mat=m, S=s, mo=True) for (m,s) in zip(mats, Slist)]
-colorlist = ['darkorange', 'firebrick', 'midnightblue']
+colorlist = ['firebrick', 'midnightblue']
 plot_coupling(axes[1], couplist, colors=colorlist, ls=lslist)
 couplist = [coup.MagneticDipole(omega=mlist, mat=m, S=s, mo=True) for (m,s) in zip(mats, Slist)]
 plot_coupling(axes[0], couplist, colors=colorlist, ls=lslist)
@@ -66,7 +75,7 @@ plot_coupling(axes[0], couplist, colors=colorlist, ls=lslist)
 matlist = ['GaAs', 'Al2O3', 'SiO2']
 mats = [material.Material(m) for m in matlist]
 colorlist = ['firebrick', 'midnightblue', 'forestgreen']
-couplist = [coup.MagneticDipole(omega=mlist, mat=m, mixing=True, mo=False) for m in mats]
+couplist = [coup.MagneticDipole(omega=mlist, mat=m, mixing=True, S=Slist, mo=False) for m in mats]
 plot_coupling(axes[0], couplist, colors=colorlist)
 
 ## Plot other constraints
