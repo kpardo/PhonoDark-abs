@@ -207,7 +207,7 @@ class MagneticDipole:
             Nj = self.mat.get_Nj()
             self.S = self.S*np.ones((len(Nj), 3))
             Fe = (np.einsum('w, jb, bai -> jwai',
-                            2.*1j*self.omega**2,
+                            -2.*1j*self.omega**2,
                             self.S, self.levicivita()))
             self.formfac = self.ce * Fe
             if self.mixing:
