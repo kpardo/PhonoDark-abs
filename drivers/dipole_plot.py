@@ -15,7 +15,8 @@ from pda.plotting import *
 
 from mp_api.client import MPRester
 
-mlist = np.linspace(0.01,1,int(1e5));
+# mlist = np.linspace(0.01,1,int(1e5));
+mlist = np.logspace(-2, 0, int(1e3))
 
 ## setup plotting
 ncols = 2
@@ -60,10 +61,12 @@ colorlist = ['darkorange', 'firebrick', 'midnightblue']
 plot_coupling(axes[1], couplist, colors=colorlist, ls=lslist)
 couplist = [coup.MagneticDipole(omega=mlist, mat=m, S=s, mo=True) for (m,s) in zip(mats, Slist)]
 plot_coupling(axes[0], couplist, colors=colorlist, ls=lslist)
-## No Magnetic Ordering
+
+# ## No Magnetic Ordering
 matlist = ['GaAs', 'Al2O3', 'SiO2']
+mats = [material.Material(m) for m in matlist]
 colorlist = ['firebrick', 'midnightblue', 'forestgreen']
-couplist = [coup.MagneticDipole(omega=mlist, mat=m, mo=False) for m in mats]
+couplist = [coup.MagneticDipole(omega=mlist, mat=m, mixing=True, mo=False) for m in mats]
 plot_coupling(axes[0], couplist, colors=colorlist)
 
 ## Plot other constraints

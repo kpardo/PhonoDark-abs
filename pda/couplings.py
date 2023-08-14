@@ -178,7 +178,7 @@ class ElectricDipole:
         return eijk
 
 
-@dataclass
+@dataclass(kw_only=True)
 class MagneticDipole:
     omega: np.ndarray  # e.g., DM masses
     mat: None
