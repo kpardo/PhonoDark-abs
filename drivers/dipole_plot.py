@@ -15,8 +15,7 @@ from pda.plotting import *
 
 from mp_api.client import MPRester
 
-# mlist = np.linspace(0.01,1,int(1e5));
-mlist = np.logspace(-2, 0, int(1e3))
+mlist = np.linspace(0.01,1,int(1e5));
 
 ## setup plotting
 ncols = 2
