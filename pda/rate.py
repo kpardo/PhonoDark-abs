@@ -44,7 +44,7 @@ def rate(mass_list, mat, q_XYZ_list=np.zeros((1)), coupling=None, pol_mixing=Tru
     # Get full rate, Eqn. 5
     prefac = RHO_DM * mass_list**(-1) * 1./mat.rho_T
     rate = prefac * totself
-    if coupling.se_shape != 'scalar':
+    if (coupling.se_shape != 'scalar') and (coupling.se_shape != 'axion'):
         ## if coupling to a vector, average over polarizations
         ## Eqn. 7
         rate *= 1./3.

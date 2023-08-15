@@ -91,23 +91,30 @@ for c in range(ncols):
                label = y_labels[c], 
                show_first = False)
 ## plot our limits
-matlist = ['FeBr2', 'GaAs', 'Al2O3']
+matlist = ['FeBr2']
 mats = [material.Material(m) for m in matlist]
-lslist = ['solid', ':', ':']
+lslist = ['solid']
+Slist = np.array([
+            [0.0, 0.0, 1.8],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0]]
+        )
+couplist = [coup.Axion(omega=mlist, mat=mats[0], S=Slist)]
+plot_coupling(axes[0], couplist, colors=['darkorange'], ls=lslist)
+
+matlist = ['GaAs', 'Al2O3']
+mats = [material.Material(m) for m in matlist]
+lslist = [':', ':']
 Slist = []
-# with MPRester("9vCkS05eZPuFj169jSiZCNf9P5E6ckik") as mpr:
-                # magnetism_doc = mpr.magnetism.search(material_ids=["mp-22880"])
-                # Slist.append(magnetism_doc[0].magmoms)
-Slist.append([0, 0, 1.8]) #FeBr2
 Slist.append([0,0,0.5])
 Slist.append([0,0,0.5])
 couplist = [coup.Axion(omega=mlist, mat=m, S=s) for (m,s) in zip(mats, Slist)]
-colorlist = ['darkorange', 'firebrick', 'midnightblue']
+colorlist = ['firebrick', 'midnightblue']
 plot_coupling(axes[0], couplist, colors=colorlist, ls=lslist)
 couplist = [coup.Axion(omega=mlist, mat=m, S=s, fermion_coupling='n') for (m,s) in zip(mats, Slist)]
-plot_coupling(axes[1], couplist[1:], colors=colorlist[1:], ls=lslist[1:])
+plot_coupling(axes[1], couplist, colors=colorlist, ls=lslist)
 couplist = [coup.Axion(omega=mlist, mat=m, S=s, fermion_coupling='p') for (m,s) in zip(mats, Slist)]
-plot_coupling(axes[2], couplist[1:], colors=colorlist[1:], ls=lslist[1:])
+plot_coupling(axes[2], couplist, colors=colorlist, ls=lslist)
 
 
 ## plot other constraints
