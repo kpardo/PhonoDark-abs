@@ -22,9 +22,19 @@ If you use this code, please cite this paper:
 [Effective Field Theory for Dark Matter Absorption on Single Phonons](https://arxiv.org/abs/2308.06314)
 
 with the citation:
->
-> CITATION TBA
->
+
+```
+  @article{Mitridate:2023izi,
+      author = "Mitridate, Andrea and Pardo, Kris and Trickle, Tanner and Zurek, Kathryn M.",
+      title = "{Effective Field Theory for Dark Matter Absorption on Single Phonons}",
+      eprint = "2308.06314",
+      archivePrefix = "arXiv",
+      primaryClass = "hep-ph",
+      reportNumber = "CALT-TH-2023-032, DESY-23-113, FERMILAB-PUB-23-417-T",
+      month = "8",
+      year = "2023"
+  }
+```
 
 
 
